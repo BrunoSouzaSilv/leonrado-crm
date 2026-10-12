@@ -18,6 +18,7 @@ jobs:
     # herança inclusive nos processos-filhos do Next.
     env:
       NODE_OPTIONS: --max-old-space-size=8192
+      AVIA_DESKTOP_BUILD: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

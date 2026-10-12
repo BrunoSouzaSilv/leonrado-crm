@@ -15,6 +15,13 @@ const nextConfig: NextConfig = {
   // desligado porque Next 16.3 + adapter + standalone quebra o onBuildComplete
   // com ENOENT next-server.js.nft.json (#96646).
   output: process.env.VERCEL ? undefined : "standalone",
+  // AVIA Desktop: o `pnpm build` do instalador (.dmg) pula o typecheck do
+  // Next — ele estoura o heap mesmo com 8 GB no runner macOS, e a tipagem já
+  // é provada pelo `pnpm typecheck` do CI e pelo build local. Só vale com
+  // AVIA_DESKTOP_BUILD=1 (workflow avia-desktop-mac.yml); default intacto.
+  typescript: {
+    ignoreBuildErrors: process.env.AVIA_DESKTOP_BUILD === "1",
+  },
   /**
    * O `standalone` copia SÓ o que o file tracing detecta — e ele não detecta
    * tudo de `@swc/helpers`.
