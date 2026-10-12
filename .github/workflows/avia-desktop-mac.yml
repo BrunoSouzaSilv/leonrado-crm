@@ -13,6 +13,11 @@ on:
 jobs:
   dmg:
     runs-on: macos-latest
+    # Heap alto para TODOS os passos: o typecheck do build estoura os ~2 GB
+    # padrão (o Dockerfile usa 4 GB pelo mesmo motivo). Env de job garante
+    # herança inclusive nos processos-filhos do Next.
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,12 +28,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # O typecheck do build estoura o heap padrão (~2 GB): o Dockerfile usa
-      # NODE_OPTIONS=--max-old-space-size=4096 pelo mesmo motivo. O runner
-      # macOS tem 14 GB, então 6 GB de heap é seguro.
       - run: pnpm build
-        env:
-          NODE_OPTIONS: --max-old-space-size=6144
       - run: node electron/scripts/prepare-dist.mjs --platform mac
       - run: |
           mkdir -p electron/build/icon.iconset
