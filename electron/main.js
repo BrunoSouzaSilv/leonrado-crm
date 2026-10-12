@@ -164,6 +164,10 @@ ipcMain.handle("avia:save-config", async (_evt, cfg) => {
       `APP_NAME=AVIA`,
       `APP_LOGO_URL=/avia-logo.png`,
       `APP_ACCENT_HEX=#A98A50`,
+      `WAHA_API_BASE_URL=${cfg.waha_url || ""}`,
+      `WAHA_API_KEY=${cfg.waha_key || ""}`,
+      `WAHA_HMAC_SECRET=${cfg.waha_hmac || ""}`,
+      `WAHA_WEBHOOK_BASE_URL=${cfg.waha_hook || ""}`,
     ];
     fs.mkdirSync(path.dirname(userEnvFile()), { recursive: true });
     fs.writeFileSync(userEnvFile(), lines.join("\n") + "\n", { mode: 0o600 });

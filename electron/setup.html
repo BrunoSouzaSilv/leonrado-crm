@@ -31,6 +31,16 @@
   <input id="db" placeholder="postgresql://postgres.xxx:senha@...pooler.supabase.com:5432/postgres">
   <label>Chave Groq (console.groq.com/keys)</label>
   <input id="groq" placeholder="gsk-...">
+  <h1 style="font-size:17px;margin-top:26px">WhatsApp (WAHA) — opcional</h1>
+  <p>Se o WAHA estiver rodando (na VPS ou onde for), preencha para o AVIA conversar com ele. Pode deixar vazio e configurar depois.</p>
+  <label>URL do WAHA (onde ele está rodando)</label>
+  <input id="waha_url" placeholder="http://SEU_IP:3030">
+  <label>Chave da API do WAHA (texto puro, a mesma do painel)</label>
+  <input id="waha_key" placeholder="...">
+  <label>Segredo HMAC dos webhooks (o mesmo do container WAHA)</label>
+  <input id="waha_hmac" placeholder="...">
+  <label>URL pública deste programa (para o WAHA chamar de volta — ex. túnel ngrok)</label>
+  <input id="waha_hook" placeholder="https://xxxx.ngrok.io">
   <div id="erro"></div>
   <button id="salvar">Salvar e abrir o AVIA</button>
 </div>
@@ -39,7 +49,8 @@
     const v = (id) => document.getElementById(id).value.trim();
     const cfg = { url: v("url"), anon: v("anon"), service: v("service"), db: v("db"), groq: v("groq") };
     const faltando = Object.entries(cfg).filter(([, x]) => !x).map(([k]) => k);
-    if (faltando.length) { document.getElementById("erro").textContent = "Preencha todos os campos."; return; }
+    if (faltando.length) { document.getElementById("erro").textContent = "Preencha todos os campos (o bloco WhatsApp é opcional)."; return; }
+    cfg.waha_url = v("waha_url"); cfg.waha_key = v("waha_key"); cfg.waha_hmac = v("waha_hmac"); cfg.waha_hook = v("waha_hook");
     const r = await window.aviaSetup.salvar(cfg);
     if (!r.ok) document.getElementById("erro").textContent = r.erro;
   };
