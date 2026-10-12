@@ -1,6 +1,10 @@
 appId: com.avia.crm
 productName: AVIA
 copyright: © 2026 AVIA · Agência Outservice · Todos os direitos reservados
+directories:
+  # NUNCA `dist`: é onde o prepare-dist gera worker/node-runtime/avia.env.
+  # Saída do instalador vai para `release/`.
+  output: release
 files:
   - main.js
   - preload.js

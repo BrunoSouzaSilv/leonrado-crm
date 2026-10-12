@@ -53,4 +53,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: AVIA-mac
-          path: electron/dist/*.dmg
+          path: electron/release/*.dmg
