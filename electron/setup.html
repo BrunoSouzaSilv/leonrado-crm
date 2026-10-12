@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AVIA — Configuração inicial</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0A0B0F; color: #F5F5F7; display: flex; justify-content: center; padding: 32px; margin: 0; }
+  .box { width: 520px; }
+  h1 { color: #A98A50; font-size: 22px; }
+  p { color: #a1a1b0; font-size: 13px; }
+  label { display: block; margin: 14px 0 4px; font-size: 13px; }
+  input { width: 100%; box-sizing: border-box; padding: 9px; border-radius: 6px; border: 1px solid #3d3e48; background: #1B1C20; color: #F5F5F7; }
+  small { color: #6e6e7a; font-size: 11px; }
+  button { margin-top: 20px; width: 100%; padding: 12px; border: 0; border-radius: 8px; background: #A98A50; color: #0A0B0F; font-weight: 700; font-size: 15px; cursor: pointer; }
+  #erro { color: #e06c5b; font-size: 13px; margin-top: 10px; min-height: 18px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>AVIA — Configuração inicial</h1>
+  <p>Cada instalação usa o <b>seu próprio</b> Supabase e a <b>sua</b> chave de IA.
+  Nada daqui sai desta máquina. Você só faz isto uma vez.</p>
+  <label>URL do Supabase (Project Settings → API)</label>
+  <input id="url" placeholder="https://xxxx.supabase.co">
+  <label>Chave anon (legacy)</label>
+  <input id="anon" placeholder="eyJhbGciOi...">
+  <label>Chave service_role (legacy)</label>
+  <input id="service" placeholder="eyJhbGciOi...">
+  <small>As chaves ficam salvas só neste computador.</small>
+  <label>Connection string — Session pooler, porta 5432 (Settings → Database)</label>
+  <input id="db" placeholder="postgresql://postgres.xxx:senha@...pooler.supabase.com:5432/postgres">
+  <label>Chave Groq (console.groq.com/keys)</label>
+  <input id="groq" placeholder="gsk-...">
+  <div id="erro"></div>
+  <button id="salvar">Salvar e abrir o AVIA</button>
+</div>
+<script>
+  document.getElementById("salvar").onclick = async () => {
+    const v = (id) => document.getElementById(id).value.trim();
+    const cfg = { url: v("url"), anon: v("anon"), service: v("service"), db: v("db"), groq: v("groq") };
+    const faltando = Object.entries(cfg).filter(([, x]) => !x).map(([k]) => k);
+    if (faltando.length) { document.getElementById("erro").textContent = "Preencha todos os campos."; return; }
+    const r = await window.aviaSetup.salvar(cfg);
+    if (!r.ok) document.getElementById("erro").textContent = r.erro;
+  };
+</script>
+</body>
+</html>

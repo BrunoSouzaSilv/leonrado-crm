@@ -45,7 +45,7 @@ const org = {
 let contexto: { user: AuthUser; activeOrg: ActiveOrg | null } = { user: usuario, activeOrg: org };
 vi.mock("@/hooks/auth/AuthProvider", () => ({ useAuth: () => contexto }));
 
-const PADRAO: Branding = { name: DEFAULT_APP_NAME, logoUrl: null, initial: "D" };
+const PADRAO: Branding = { name: DEFAULT_APP_NAME, logoUrl: null, initial: "A" };
 
 function renderSidebar(marca: Branding, collapsed: boolean) {
   return render(
@@ -84,14 +84,17 @@ describe("o desenho na barra lateral", () => {
     // O e2e `marca-logo.spec.ts` lê "barra sem <img>" como "sem logo do
     // revendedor"; um <img> do produto aqui faria a spec medir a coisa errada.
     expect(document.querySelector("img")).toBeNull();
-    // Nem o nome em texto: o logotipo já o escreve.
-    expect(screen.queryByText(DEFAULT_APP_NAME)).toBeNull();
+    // O nome aparece SÓ dentro do SVG (desenho do produto), nunca como texto
+    // HTML solto — o desenho AVIA usa <text> interno.
+    const ocorrencias = screen.queryAllByText(DEFAULT_APP_NAME);
+    expect(ocorrencias.length).toBeGreaterThan(0);
+    for (const no of ocorrencias) expect(no.closest("svg")).not.toBeNull();
   });
 
   it("recolhida, mostra só o símbolo — e não a inicial em texto", () => {
     renderSidebar(PADRAO, true);
     expect(screen.getByRole("img", { name: DEFAULT_APP_NAME }).tagName.toLowerCase()).toBe("svg");
-    expect(screen.queryByText("D")).toBeNull();
+    expect(screen.queryByText("A", { selector: "span" })).toBeNull();
   });
 
   it("com nome da instalação, segue em texto — o desenho do produto não vaza", () => {
@@ -142,9 +145,9 @@ describe("as cores do desenho", () => {
 describe("o favicon segue a mesma regra", () => {
   const icone = fs.readFileSync(path.join(process.cwd(), "app/icon.tsx"), "utf8");
 
-  it("desenha o símbolo quando a marca é a do produto, e a inicial quando não é", () => {
+  it("desenha o A do produto quando a marca é a do produto, e a inicial quando não é", () => {
     expect(icone).toMatch(/marcaEhADoProduto\(\{ name: marca\.nome, logoUrl: marca\.logoUrl \}\)/);
-    expect(icone).toMatch(/<path d=\{SIMBOLO\.d\}/);
+    expect(icone).toMatch(/AVIA: ladrilho ouro/);
     expect(icone).toMatch(/letraDoIcone\(marca\.nome\)/);
   });
 });

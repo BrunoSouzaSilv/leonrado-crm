@@ -14,6 +14,13 @@
 # um script do kit "não encontrado" no meio da atualização.
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 source "$KIT_DIR/_common.sh"
+# AVIA — fork travado: recusa qualquer update para proteger o rebrand.
+# O update.sh original puxaria código/imagem Deskcomm e reverteria AVIA.
+# Desbloqueio manual: AVIA_UPDATE_UNLOCKED=1 bash hostgator-setup-kit/update.sh
+if [ "${AVIA_UPDATE_UNLOCKED:-0}" != "1" ]; then
+  echo "AVIA: atualizações travadas neste fork. Defina AVIA_UPDATE_UNLOCKED=1 para forçar."
+  exit 1
+fi
 # O aviso que assume a porta enquanto o CRM esta parado. Fica em arquivo
 # proprio porque so a ATUALIZACAO para o CRM — install.sh e agent.sh sourceiam
 # `_common.sh` e nao tem o que anunciar.

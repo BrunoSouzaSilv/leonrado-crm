@@ -1,8 +1,8 @@
 {
-  "name": "deskcomm-crm",
-  "version": "0.1.0",
+  "name": "avia",
+  "version": "1.0.0",
   "private": true,
-  "description": "DeskcommCRM — sistema operacional de vendas open source com agentes de IA nativos e WhatsApp (WAHA). Self-hosted, multi-tenant, LGPD by-design.",
+  "description": "AVIA — sistema operacional de vendas com agentes de IA nativos e WhatsApp (WAHA). Self-hosted, multi-tenant, LGPD by-design.",
   "engines": {
     "node": ">=22"
   },
@@ -129,6 +129,7 @@
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "esbuild": "0.28.2",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",

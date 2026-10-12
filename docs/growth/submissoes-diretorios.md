@@ -49,15 +49,10 @@ Critérios: ser open source · ser alternativa a um software proprietário · at
 
 **Recomendo pagar.** Seis meses de fila é longo demais para uma campanha, e este é um dos domínios que aparecem na primeira página quando se busca "best open source CRM" — ou seja, é material de citação para LLM, que é exatamente o que estamos comprando. US$ 29 é o item mais barato do plano inteiro.
 
-**Como preencher** — submeter uma vez por concorrente, começando pelo de maior volume de busca:
+**Como preencher:**
 
-| Software proprietário | Site |
-|---|---|
-| Kommo | kommo.com |
-| Intercom | intercom.com |
-| Octadesk | octadesk.com |
-
-Nome da alternativa: `DeskcommCRM` · Repositório: `https://github.com/melgarafael/DeskcommCRM`
+- **Nome:** `AVIA` · **Categoria:** CRM / Customer Support · **Plataformas:** Self-Hosted, Web, Docker
+- **Descrição:** *AI sales OS for WhatsApp. AI agents answer, qualify and move deals inside a CRM you host yourself. Multi-tenant with row-level security, LGPD by design.*
 
 ---
 
@@ -65,12 +60,10 @@ Nome da alternativa: `DeskcommCRM` · Repositório: `https://github.com/melgaraf
 
 Exige conta no site. Sem custo, sem trava de idade.
 
-- **Nome:** DeskcommCRM
+- **Nome:** AVIA
 - **Categoria:** CRM / Customer Support
-- **Licença:** Open Source (MIT)
 - **Plataformas:** Self-Hosted, Web, Docker
-- **Alternativa a:** Kommo, Intercom, Octadesk, HubSpot, Zendesk
-- **Descrição:** *Open-source AI sales OS for WhatsApp. AI agents answer, qualify and move deals inside a CRM you host yourself. Multi-tenant with row-level security, LGPD by design, MIT-licensed with no paid tier.*
+- **Descrição:** *AI sales OS for WhatsApp. AI agents answer, qualify and move deals inside a CRM you host yourself. Multi-tenant with row-level security, LGPD by design.*
 
 ---
 

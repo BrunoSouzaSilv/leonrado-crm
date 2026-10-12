@@ -1,0 +1,50 @@
+name: AVIA — programa para Mac (.dmg)
+
+# Compila o AVIA + Electron num runner macOS e entrega o .dmg como artefato.
+# Mac EXIGE compilação em máquina Apple — não sai no Windows.
+# Sem assinatura/notarização Apple: o cliente abre com botão direito > Abrir.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ["main"]
+    paths: ["electron/**", ".github/workflows/avia-desktop-mac.yml"]
+
+jobs:
+  dmg:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: node electron/scripts/prepare-dist.mjs --platform mac
+      - run: |
+          mkdir -p electron/build/icon.iconset
+          sips -z 16 16     public/avia-logo.png --out electron/build/icon.iconset/icon_16x16.png
+          sips -z 32 32     public/avia-logo.png --out electron/build/icon.iconset/icon_16x16@2x.png
+          sips -z 32 32     public/avia-logo.png --out electron/build/icon.iconset/icon_32x32.png
+          sips -z 64 64     public/avia-logo.png --out electron/build/icon.iconset/icon_32x32@2x.png
+          sips -z 128 128   public/avia-logo.png --out electron/build/icon.iconset/icon_128x128.png
+          sips -z 256 256   public/avia-logo.png --out electron/build/icon.iconset/icon_128x128@2x.png
+          sips -z 256 256   public/avia-logo.png --out electron/build/icon.iconset/icon_256x256.png
+          sips -z 512 512   public/avia-logo.png --out electron/build/icon.iconset/icon_256x256@2x.png
+          sips -z 512 512   public/avia-logo.png --out electron/build/icon.iconset/icon_512x512.png
+          sips -z 1024 1024 public/avia-logo.png --out electron/build/icon.iconset/icon_512x512@2x.png
+          iconutil -c icns electron/build/icon.iconset -o electron/build/icon.icns
+      - run: npm install --no-audit --no-fund
+        working-directory: electron
+      - run: npx electron-builder --mac --publish never
+        working-directory: electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AVIA-mac
+          path: electron/dist/*.dmg

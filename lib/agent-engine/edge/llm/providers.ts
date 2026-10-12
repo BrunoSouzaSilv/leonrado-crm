@@ -53,6 +53,13 @@ export const OPENROUTER_ENDPOINT = process.env.OPENROUTER_BASE_URL?.trim() || 'h
 export const DEEPSEEK_ENDPOINT = 'https://api.deepseek.com';
 
 /**
+ * A Groq também fala a API da OpenAI — mesma fábrica, mesmo formato de
+ * payload, sem SDK novo. O endpoint é o compatível que o provedor documenta
+ * (o `@ai-sdk/openai` acrescenta `/chat/completions`).
+ */
+export const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1';
+
+/**
  * A Requesty é um roteador OpenAI-compatível como a OpenRouter: uma chave dá
  * acesso a modelos de vários fabricantes, e os ids vêm no formato
  * `fabricante/modelo` (`openai/gpt-4o-mini`). Mesma fábrica, sem SDK novo.
@@ -292,6 +299,16 @@ export function createDefaultRegistry(opts?: {
       const fetchFinal =
         opts?.deepseekThinking === 'disabled' ? comRaciocinioDesligado(contido) : contido;
       return createOpenAI({ apiKey, baseURL: endpoint, fetch: fetchFinal })(modelId);
+    },
+    /**
+     * Groq: inferência OpenAI-compatível, com `base_url` próprio pela mesma
+     * razão da OpenRouter (a allowlist do egress segue o endpoint escolhido).
+     * `.chat()` pela mesma razão também: Chat Completions é o formato que o
+     * provedor serve para qualquer família de modelo.
+     */
+    groq: (apiKey, modelId, baseUrl) => {
+      const endpoint = baseUrl ?? GROQ_ENDPOINT;
+      return createOpenAI({ apiKey, baseURL: endpoint, fetch: contain(endpoint) }).chat(modelId);
     },
     /**
      * Requesty: roteador OpenAI-compatível, com `base_url` próprio pela mesma

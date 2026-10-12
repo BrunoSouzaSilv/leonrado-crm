@@ -228,6 +228,9 @@ const schema = z.object({
   VERCEL_AI_GATEWAY_URL: z.string().optional().default(""),
   ANTHROPIC_API_KEY: z.string().optional().default(""),
   OPENAI_API_KEY: z.string().optional().default(""),
+  // Groq (inferência OpenAI-compatível): chave de plataforma, mesmo papel das
+  // demais — último degrau quando a organização escolhe Groq e não tem BYOK.
+  GROQ_API_KEY: z.string().optional().default(""),
   // Esforço de raciocínio dos modelos da OpenAI (o*, gpt-5*, gpt-6*). `z.string()`
   // e NUNCA `z.enum` (motivo mais abaixo, em AGENT_DISPATCH_CONSUMER): quem valida
   // a grafia é o boot do worker, em `lib/agent-engine/env.ts`.
@@ -621,11 +624,12 @@ if (
   !env.AI_GATEWAY_API_KEY &&
   !env.ANTHROPIC_API_KEY &&
   !env.OPENROUTER_API_KEY &&
-  !env.OPENAI_API_KEY
+  !env.OPENAI_API_KEY &&
+  !env.GROQ_API_KEY
 ) {
   console.warn(
     "[env] Nenhuma chave de IA configurada no ambiente " +
-      "(AI_GATEWAY_API_KEY, ANTHROPIC_API_KEY, OPENROUTER_API_KEY ou OPENAI_API_KEY). " +
+      "(AI_GATEWAY_API_KEY, ANTHROPIC_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY ou GROQ_API_KEY). " +
       "Isto não prova que o agente está sem credencial: cada organização pode ter uma chave " +
       "cadastrada em IA › Credenciais. A falta real só é conhecida quando a resolução completa " +
       "do turno não encontra chave em nenhum degrau.",

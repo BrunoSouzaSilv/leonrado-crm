@@ -97,6 +97,16 @@ export const PROVEDORES = [
     prefixoDaChave: "sk-…",
   },
   {
+    id: "groq",
+    rotulo: "Groq",
+    quandoUsar:
+      "Inferência muito rápida (Llama e outros modelos open) com custo baixo — boa para atendimento em tempo real.",
+    aceitaEndpointProprio: true,
+    catalogoSincronizavel: true,
+    ondePegarAChave: "https://console.groq.com/keys",
+    prefixoDaChave: "gsk-…",
+  },
+  {
     id: "requesty",
     rotulo: "Requesty",
     quandoUsar:

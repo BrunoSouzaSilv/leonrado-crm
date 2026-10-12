@@ -110,6 +110,11 @@ export default async function PublicLayout({ children }: { children: React.React
             </div>
           ) : null}
           {children}
+          <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+            © 2026 AVIA · Todos os direitos reservados
+            <br />
+            Agência Outservice · Dev. Bruno Vitally
+          </p>
         </div>
       </div>
     </IdiomaProvider>

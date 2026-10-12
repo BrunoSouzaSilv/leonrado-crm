@@ -1,15 +1,15 @@
-import { LOGOTIPO, SIMBOLO } from "@/lib/branding/desenho";
 import { cn } from "@/lib/utils";
 
 /**
  * A marca do PRODUTO desenhada em SVG inline — o que a tela mostra quando
  * ninguém configurou marca própria (`marcaEhADoProduto`, em `lib/branding.ts`).
  *
- * Inline, e não `<img src="/algo.svg">`, por três motivos:
- *  - as cores seguem o TEMA: sálvia mais clara e nome em creme no escuro, como
- *    a régua do produto já define — um arquivo estático teria uma cor só;
+ * AVIA: o desenho é a letra "A" em ouro sobre o tema, mais o nome "AVIA" em
+ * texto SVG. Inline, e não `<img src="/algo.svg">`, por três motivos:
+ *  - as cores seguem o TEMA via classes `fill-*` — um arquivo estático teria
+ *    uma cor só;
  *  - nada em `public/`: um `.svg` fixo ali seria servido na instalação de um
- *    revendedor que configurou a marca dele (ver `lib/branding/desenho.ts`);
+ *    revendedor que configurou a marca dele;
  *  - a barra lateral já usa `<img>` para o logo CONFIGURADO, e o e2e
  *    `marca-logo.spec.ts` mede "barra sem `<img>`" como "sem logo do
  *    revendedor". Um `<img>` do produto ali faria a spec medir a coisa errada.
@@ -26,9 +26,9 @@ type Props = {
   readonly decorativo?: boolean;
 };
 
-const SIMBOLO_CLARO_ESCURO = "fill-[#506d48] dark:fill-[#82a077]";
-const NOME_CLARO_ESCURO = "fill-[#1c1a16] dark:fill-[#f5f4ef]";
-const SUFIXO_CLARO_ESCURO = "fill-[#5d594f] dark:fill-[#8e8b7f]";
+const SIMBOLO_CLARO_ESCURO = "fill-[#A98A50] dark:fill-[#A98A50]";
+const NOME_CLARO_ESCURO = "fill-[#0A0B0F] dark:fill-[#F5F5F7]";
+const SUFIXO_CLARO_ESCURO = "fill-[#226AAF] dark:fill-[#8e8b7f]";
 
 // As classes acima repetem os hexes de `CORES_DA_MARCA` porque o Tailwind só
 // gera utilitário para valor LITERAL no fonte. Quem impede os dois de divergirem
@@ -50,14 +50,21 @@ function acessibilidade(nome: string, decorativo: boolean) {
 export function SimboloDoProduto({ nome, className, decorativo = false }: Props) {
   return (
     <svg
-      viewBox={SIMBOLO.viewBox}
+      viewBox="0 0 64 64"
       className={cn("shrink-0", className)}
       {...acessibilidade(nome, decorativo)}
     >
-      <g className={SIMBOLO_CLARO_ESCURO} transform={SIMBOLO.transform}>
-        <path d={SIMBOLO.d} />
-        <rect {...SIMBOLO.modulo} />
-      </g>
+      <text
+        x="32"
+        y="46"
+        textAnchor="middle"
+        fontSize="42"
+        fontWeight="700"
+        fontFamily="Arial, Helvetica, sans-serif"
+        className={SIMBOLO_CLARO_ESCURO}
+      >
+        A
+      </text>
     </svg>
   );
 }
@@ -66,24 +73,21 @@ export function SimboloDoProduto({ nome, className, decorativo = false }: Props)
 export function LogotipoDoProduto({ nome, className, decorativo = false }: Props) {
   return (
     <svg
-      viewBox={LOGOTIPO.viewBox}
+      viewBox="0 0 200 64"
       className={cn("shrink-0", className)}
       {...acessibilidade(nome, decorativo)}
     >
-      <g className={SIMBOLO_CLARO_ESCURO} transform={LOGOTIPO.simbolo.transform}>
-        <path d={LOGOTIPO.simbolo.d} />
-        <rect {...LOGOTIPO.simbolo.modulo} />
-      </g>
-      <g className={NOME_CLARO_ESCURO}>
-        {LOGOTIPO.nome.map((g) => (
-          <path key={g.transform} transform={g.transform} d={g.d} />
-        ))}
-      </g>
-      <g className={SUFIXO_CLARO_ESCURO}>
-        {LOGOTIPO.sufixo.map((g) => (
-          <path key={g.transform} transform={g.transform} d={g.d} />
-        ))}
-      </g>
+      <text
+        x="10"
+        y="44"
+        fontSize="34"
+        fontWeight="700"
+        letterSpacing="4"
+        fontFamily="Arial, Helvetica, sans-serif"
+      >
+        <tspan className={SIMBOLO_CLARO_ESCURO}>A</tspan>
+        <tspan className={NOME_CLARO_ESCURO}>VIA</tspan>
+      </text>
     </svg>
   );
 }

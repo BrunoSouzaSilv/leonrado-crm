@@ -88,6 +88,24 @@ export function UpdatePanel() {
   const versao = semV(data.current_version);
   const nova = semV(data.latest_version);
 
+  // AVIA — fork travado: a atualização pela tela está desligada de propósito
+  // (o executor agent.sh sai em exit 0 e o update.sh recusa sem unlock).
+  // Mostra só a versão em vigor, sem botão.
+  if (process.env.NEXT_PUBLIC_AVIA_LOCKED !== "0") {
+    return (
+      <Layout titulo="AVIA — versão instalada">
+        <p className="text-sm">
+          Versão em vigor: <strong>{versao}</strong>.
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Atualizações automáticas estão travadas neste fork para proteger o rebrand AVIA. Para
+          atualizar manualmente, rode com <code>AVIA_UPDATE_UNLOCKED=1 bash hostgator-setup-kit/update.sh</code>{" "}
+          no servidor.
+        </p>
+      </Layout>
+    );
+  }
+
   if (rodando) {
     /**
      * ESTE É O TRECHO EM QUE A TELA PARECIA TRAVADA.

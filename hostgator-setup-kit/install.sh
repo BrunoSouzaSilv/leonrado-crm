@@ -420,6 +420,20 @@ v_openai() {
   esac
 }
 
+v_groq() {
+  [ -z "$1" ] && return 0   # opcional
+  case "$1" in gsk-*) ;; *) echo "$(t "A chave da Groq começa com 'gsk-'. Pegue em console.groq.com > API Keys (ou deixe em branco).")"; return 1;; esac
+  local code
+  code="$(curl -s -o /dev/null -w '%{http_code}' -m 20 https://api.groq.com/openai/v1/models \
+    -H "Authorization: Bearer $1" 2>/dev/null)" || code=000
+  case "$code" in
+    2*) return 0;;
+    000) c_ylw "$(t "  ⚠ não consegui checar a chave online; sigo com ela.")"; return 0;;
+    401) echo "$(t "A Groq recusou essa chave (401). Confira se está ativa e se copiou inteira.")"; return 1;;
+    *)   c_ylw "$(t "  ⚠ a Groq respondeu {1} ao testar a chave; sigo com ela." "$code")"; return 0;;
+  esac
+}
+
 v_password() {
   [ "${#1}" -ge 8 ] && return 0
   echo "$(t "Senha muito curta ({1} caracteres). Use pelo menos 8 — é a senha de admin do seu CRM." "${#1}")"
@@ -1119,7 +1133,7 @@ fi
 # colar. Sem o token, nada muda: seguem as perguntas de sempre.
 if [ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" ] && [ -n "${SUPABASE_ACCESS_TOKEN:-}" ]; then
   step "$(t "Criando o projeto Supabase automaticamente")"
-  _sb_out="$(bash "$KIT_DIR/supabase-provision.sh" "${APP_NAME:-DeskcommCRM}" "${SUPABASE_REGION:-sa-east-1}")" \
+  _sb_out="$(bash "$KIT_DIR/supabase-provision.sh" "${APP_NAME:-AVIA}" "${SUPABASE_REGION:-sa-east-1}")" \
     || die "$(t "Não consegui criar o projeto Supabase. Crie no painel e rode de novo sem SUPABASE_ACCESS_TOKEN.")"
   # O script imprime `CHAVE='valor'` em stdout (o visual dele vai para stderr).
   # A leitura é por parse, não por `eval` — o porquê está em
@@ -1163,6 +1177,7 @@ escolher_provedor() {
     if   [ -n "${OPENROUTER_API_KEY:-}" ]; then atual="openrouter"
     elif [ -n "${ANTHROPIC_API_KEY:-}" ];  then atual="anthropic"
     elif [ -n "${OPENAI_API_KEY:-}" ];     then atual="openai"
+    elif [ -n "${GROQ_API_KEY:-}" ];       then atual="groq"
     fi
   fi
 
@@ -1177,11 +1192,12 @@ escolher_provedor() {
   printf '  %s\n' "$(t "[2] Anthropic   — o Claude. É o que melhor segue instruções longas e usa")"
   printf '                    %s\n' "$(t "as ferramentas do CRM. (console.anthropic.com)")"
   printf '  %s\n' "$(t "[3] OpenAI      — o GPT. (platform.openai.com/api-keys)")"
+  printf '  %s\n' "$(t "[4] Groq        — inferência muito rápida e barata (Llama). (console.groq.com/keys)")"
   printf '\n'
   printf '  %s\n\n' "$(t "Dá para trocar depois, e por parte do sistema, em Agente de IA → Provedores.")"
 
   local padrao_num=2
-  case "$atual" in openrouter) padrao_num=1;; openai) padrao_num=3;; esac
+  case "$atual" in openrouter) padrao_num=1;; openai) padrao_num=3;; groq) padrao_num=4;; esac
 
   while :; do
     if ! read -r -p "$(t "Escolha (Enter = {1}): " "$padrao_num")" escolha; then escolha=""; fi
@@ -1190,7 +1206,8 @@ escolher_provedor() {
       1) AI_PROVIDER="openrouter"; break;;
       2) AI_PROVIDER="anthropic";  break;;
       3) AI_PROVIDER="openai";     break;;
-      *) c_ylw "$(t "Digite 1, 2 ou 3.")";;
+      4) AI_PROVIDER="groq";       break;;
+      *) c_ylw "$(t "Digite 1, 2, 3 ou 4.")";;
     esac
   done
 }
@@ -1210,6 +1227,7 @@ escolher_provedor
 case "$AI_PROVIDER" in
   openrouter) CAMPO_IA="OPENROUTER_API_KEY|Chave da OpenRouter — a IA que atende (openrouter.ai/keys; Enter pula: dá para cadastrar depois pela tela, em IA › Credenciais)||v_openrouter|secret|opcional";;
   openai)     CAMPO_IA="OPENAI_API_KEY|Chave da OpenAI — a IA que atende (platform.openai.com/api-keys; Enter pula: dá para cadastrar depois pela tela, em IA › Credenciais)||v_openai|secret|opcional";;
+  groq)       CAMPO_IA="GROQ_API_KEY|Chave da Groq — a IA que atende (console.groq.com/keys; Enter pula: dá para cadastrar depois pela tela, em IA › Credenciais)||v_groq|secret|opcional";;
   *)          CAMPO_IA="ANTHROPIC_API_KEY|Chave da Anthropic — a IA que atende (console.anthropic.com; Enter pula: dá para cadastrar depois pela tela, em IA › Credenciais)||v_anthropic|secret|opcional";;
 esac
 
@@ -1294,7 +1312,7 @@ FIELDS=(
   ${CAMPO_OPENAI_EXTRA:+"$CAMPO_OPENAI_EXTRA"}
   "OWNER_EMAIL|E-mail do primeiro admin (dono)||v_email||"
   "OWNER_PASSWORD|Senha do primeiro admin (mínimo 8 caracteres)||v_password|secret|"
-  "APP_NAME|Nome que aparece na interface (Enter para o padrão)|DeskcommCRM|||"
+  "APP_NAME|Nome que aparece na interface (Enter para o padrão)|AVIA|||"
   # Idioma da instalação. Fica JUNTO do nome do produto de propósito: as duas
   # perguntas são "como o sistema se apresenta", e separá-las faria a segunda
   # parecer configuração técnica.
@@ -1303,7 +1321,7 @@ FIELDS=(
   # variável (campo sem default e sem `opcional` morre em `die`), e o `envq` lá
   # embaixo usa `${APP_ACCENT_HEX:-}`. Enter = a cor do produto, que é o
   # comportamento de sempre para quem não tem marca própria.
-  "APP_ACCENT_HEX|Cor da sua marca em hex, ex.: #7a5cd6 (Enter usa a cor do sistema)||v_hex||opcional"
+  "APP_ACCENT_HEX|Cor da sua marca em hex, ex.: #A98A50 (Enter usa a cor do sistema)||v_hex||opcional"
   "SUPPORT_EMAIL|E-mail de suporte que SEUS clientes veem (Enter pula)||v_email||opcional"
   "RESEND_API_KEY|Chave da Resend — envia convite e e-mail de LGPD (resend.com/api-keys, Enter pula)|||secret|opcional"
   "RESEND_FROM_EMAIL|Remetente dos e-mails, de um domínio verificado na Resend (Enter pula)||v_email||opcional"
@@ -1663,7 +1681,7 @@ esac
   # e os demais não chamam perguntar_idioma_cli, então seguem em pt-BR mesmo com
   # esta linha no .env.
   envq DESKCOMM_IDIOMA_CLI "$IDIOMA_CLI"
-  envq APP_LOGO_URL "${APP_LOGO_URL:-}"
+  envq APP_LOGO_URL "${APP_LOGO_URL:-/avia-logo.png}"
   # Perguntar sem gravar seria PIOR que não perguntar: este bloco fecha com
   # `} > .env`, que TRUNCA o arquivo a partir da lista fechada de `envq` acima e
   # abaixo — a pessoa responderia a cor e a perderia em silêncio, na mesma
@@ -1732,6 +1750,9 @@ esac
   printf '# OpenAI: transcrição dos áudios do WhatsApp (Whisper) + embeddings do RAG.\n'
   printf '# Opcional — sem ela a IA responde sem a base e pede o áudio em texto.\n'
   envq OPENAI_API_KEY "${OPENAI_API_KEY:-}"
+  printf '# Groq: inferência rápida e barata (Llama). Vale como chave de plataforma\n'
+  printf '# quando a organização escolhe Groq e não tem BYOK em IA › Credenciais.\n'
+  envq GROQ_API_KEY "${GROQ_API_KEY:-}"
   printf '# Web Push: aviso na bandeja do sistema com a aba do CRM fechada.\n'
   printf '# Opcional e VAZIO por padrão — sem o par, os avisos aparecem só com o\n'
   printf '# site aberto, que é exatamente o que acontecia antes. Para ligar:\n'
@@ -2037,6 +2058,7 @@ pendencia_da_ia() {
   case "${AI_PROVIDER:-anthropic}" in
     openrouter) chave="${OPENROUTER_API_KEY:-}"; rotulo="OpenRouter" ;;
     openai)     chave="${OPENAI_API_KEY:-}";     rotulo="OpenAI" ;;
+    groq)       chave="${GROQ_API_KEY:-}";       rotulo="Groq" ;;
     *)          chave="${ANTHROPIC_API_KEY:-}";  rotulo="Anthropic" ;;
   esac
   [ -n "$chave" ] && return 0

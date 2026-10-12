@@ -1,9 +1,8 @@
 import { ImageResponse } from "next/og";
 
 import { marcaEhADoProduto } from "@/lib/branding";
-import { CORES_DA_MARCA, SIMBOLO } from "@/lib/branding/desenho";
 import { letraDoIcone } from "@/lib/branding/icone";
-import { marcaDaSaida, NEUTROS_DE_SAIDA } from "@/lib/branding/saida";
+import { marcaDaSaida } from "@/lib/branding/saida";
 
 /**
  * O ícone da aba, DESENHADO em runtime com a marca da instalação.
@@ -79,9 +78,7 @@ export default async function Icon() {
   const marca = await marcaDaSaida(null);
 
   if (marcaEhADoProduto({ name: marca.nome, logoUrl: marca.logoUrl })) {
-    // 78% da aresta: o D ocupa ~75% do próprio viewBox, então sobra o mesmo
-    // respiro que a letra tem no ramo de baixo.
-    const lado = Math.round(size.width * 0.78);
+    // AVIA: ladrilho ouro com "A" — marca padrão do fork.
     return new ImageResponse(
       (
         <div
@@ -91,15 +88,14 @@ export default async function Icon() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: NEUTROS_DE_SAIDA.fundo,
+            background: "#A98A50",
+            color: "#0A0B0F",
+            fontSize: Math.round(size.height * 0.62),
+            fontWeight: 700,
+            borderRadius: 0,
           }}
         >
-          <svg viewBox={SIMBOLO.viewBox} width={lado} height={lado}>
-            <g fill={CORES_DA_MARCA.claro.simbolo} transform={SIMBOLO.transform}>
-              <path d={SIMBOLO.d} />
-              <rect {...SIMBOLO.modulo} />
-            </g>
-          </svg>
+          A
         </div>
       ),
       { ...size, headers: CACHE },

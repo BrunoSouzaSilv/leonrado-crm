@@ -1,0 +1,63 @@
+name: AVIA — build da imagem (GHCR)
+
+# Fork AVIA: compila app/worker/scheduler nos runners do GitHub e publica no
+# GHCR do fork. A VPS só puxa e roda — nenhum build pesado cai nela.
+#
+# Uso:
+#   1. Push na branch `main` (ou rode manual em Actions).
+#   2. Na VPS: APP_IMAGE/WORKER_IMAGE/SCHEDULER_IMAGE apontando para
+#      ghcr.io/<owner>/avia-{app,worker,scheduler}:latest no .env,
+#      depois `docker compose -f docker-compose.prod.yml --env-file .env pull`
+#      e `up -d`.
+#
+# Primeira vez: o pacote GHCR nasce PRIVADO — abra o pacote em
+# github.com/<owner>?tab=packages, mude para público,
+# ou faça `docker login ghcr.io` na VPS.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: app
+            dockerfile: Dockerfile
+            image: avia-app
+          - service: worker
+            dockerfile: Dockerfile.worker
+            image: avia-worker
+          - service: scheduler
+            dockerfile: Dockerfile.scheduler
+            image: avia-scheduler
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ github.sha }}
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

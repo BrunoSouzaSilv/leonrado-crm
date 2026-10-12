@@ -88,7 +88,7 @@ WORKDIR /app
 # passa pelo metadata-action e sem isto sairia sem origem nenhuma.
 LABEL org.opencontainers.image.source="https://github.com/melgarafael/DeskcommCRM" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.title="DeskcommCRM"
+      org.opencontainers.image.title="AVIA"
 
 # ⚠️ NADA de ARG de versão acima das camadas caras deste estágio. No BuildKit a
 # própria INSTRUÇÃO `ARG` entra na chave de cache das instruções seguintes —

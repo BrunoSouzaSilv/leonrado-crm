@@ -10,7 +10,7 @@
 # 🛠️ DeskcommCRM — The open-source AI Sales OS for WhatsApp
 
 **AI agents that answer, qualify and sell on WhatsApp — inside an open-source CRM running on your own server.**
-**No subscription, no gated features, your data stays yours. The open alternative to Kommo, Octadesk and Intercom.**
+**AI agents that answer, qualify and sell on WhatsApp — inside your private CRM, running on your server.**
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript)](https://www.typescriptlang.org)

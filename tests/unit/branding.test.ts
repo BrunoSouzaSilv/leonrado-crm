@@ -12,7 +12,7 @@ describe("resolveBranding", () => {
     expect(resolveBranding(undefined, undefined)).toEqual({
       name: DEFAULT_APP_NAME,
       logoUrl: null,
-      initial: "D",
+      initial: "A",
     });
   });
 
@@ -131,7 +131,7 @@ describe("nome do arquivo de códigos de recuperação", () => {
   it("deriva o prefixo da marca, sem acento e sem espaço", () => {
     expect(prefixoDoArquivo("Vendas Turbo")).toBe("vendas-turbo");
     expect(prefixoDoArquivo("Ótima Gestão")).toBe("otima-gestao");
-    expect(prefixoDoArquivo(DEFAULT_APP_NAME)).toBe("deskcommcrm");
+    expect(prefixoDoArquivo(DEFAULT_APP_NAME)).toBe("avia");
   });
 
   it("não devolve hífen pendurado nem repetido", () => {
@@ -263,12 +263,12 @@ const MARCA_CONGELADA: Record<string, EntradaDeMarca> = {
     categoria: "INFRA",
     motivo:
       "chave de localStorage do tema, lida no script anti-flash. Renomear faz todo mundo voltar ao tema claro no próximo acesso — e o par com lib/theme.tsx tem de mudar junto",
-    marcas: ["deskcomm-theme"],
+    marcas: ["avia-theme"],
   },
   "lib/theme.tsx": {
     categoria: "INFRA",
     motivo: "a mesma chave de localStorage do script do layout; as duas são um par só",
-    marcas: ["deskcomm-theme"],
+    marcas: ["avia-theme"],
   },
   "lib/supabase/browser.ts": {
     categoria: "INFRA",
@@ -301,13 +301,7 @@ const MARCA_CONGELADA: Record<string, EntradaDeMarca> = {
   },
 
   // ─── DIVIDA — vazamento real. Cada linha declara a fase que a apaga. ───
-  "lib/email/templates/ai-budget-alarm.tsx": {
-    categoria: "DIVIDA",
-    fase: 7,
-    motivo:
-      "template sem caminho de produção: sem rota em app/api/v1/cron/, sem linha no docker/scheduler/entrypoint.sh e, desde a limpeza do teto de orçamento (0159), sem chamador NENHUM — o único era workers/ai-budget-checker.cron.ts, que foi apagado por nunca ter tido agendador. Marcar isto não muda nada que um usuário veja, e a única 'prova' possível seria invocar a função à mão — o que prova a função, não o produto. Sai quando o alarme ganhar cron de verdade (ou quando o template for apagado junto)",
-    marcas: ["deskcommcrm"],
-  },
+  // AVIA: a última dívida (ai-budget-alarm) foi renomeada — a lista zerou.
 
   // ─── DEV — fixture de teste; não embarca. ───
   "lib/agent-engine/agent/draft-reply.test.ts": {
@@ -323,12 +317,8 @@ const MARCA_CONGELADA: Record<string, EntradaDeMarca> = {
   },
 
   // ─── PADRAO — a marca padrão precisa existir em algum lugar. ───
-  "lib/branding.ts": {
-    categoria: "PADRAO",
-    motivo:
-      "é a DEFINIÇÃO de DEFAULT_APP_NAME — o valor que aparece quando o operador não configurou marca nenhuma. Se esta linha sumir, some o padrão",
-    marcas: ["deskcommcrm"],
-  },
+  // AVIA: DEFAULT_APP_NAME = "AVIA" não contém "deskcomm", então este arquivo
+  // não tem mais marca congelada — a entrada foi removida (a lista só encolhe).
 };
 
 /**
@@ -604,21 +594,17 @@ describe("catraca de marca hardcoded", () => {
     expect(ruins, `entrada sem categoria válida ou sem justificativa escrita:\n  ${ruins.join("\n  ")}`).toEqual([]);
   });
 
-  it("a Fase 4 fechou: sobra uma dívida, e ela declara por que sobrou", () => {
-    // As três regras acima forçam a lista a ENCOLHER, mas nada impedia que ela
-    // voltasse a CRESCER: uma `DIVIDA` nova entra sem ninguém notar, porque
-    // acrescentar linha à allowlist é o caminho de menor resistência de quem
-    // está com pressa. Este caso trava o conjunto pelo NOME, não pelo tamanho —
-    // contar só o número deixaria trocar uma dívida por outra em silêncio.
+  it("a Fase 4 fechou: nenhuma dívida restante", () => {
+    // AVIA: a última dívida (ai-budget-alarm) foi renomeada no rebrand e a
+    // lista zerou. Dívida nova aqui precisa de decisão, não de mais uma linha.
     const dividas = Object.entries(MARCA_CONGELADA)
       .filter(([, e]) => e.categoria === "DIVIDA")
       .map(([arquivo]) => arquivo);
     expect(
       dividas,
-      "a Fase 4 zerou as dívidas de marca, exceto o alarme de orçamento de IA " +
-        "(que não tem caminho de produção). Dívida nova aqui precisa de decisão, " +
+      "a Fase 4 zerou as dívidas de marca. Dívida nova aqui precisa de decisão, " +
         "não de mais uma linha na lista.",
-    ).toEqual(["lib/email/templates/ai-budget-alarm.tsx"]);
+    ).toEqual([]);
   });
 
   it("toda DIVIDA nomeia a fase que a resolve, e só DIVIDA tem fase", () => {
@@ -679,12 +665,8 @@ describe("catraca de marca no que o GoTrue renderiza", () => {
   ];
 
   const CONGELADO_SUPABASE: Record<string, EntradaDeMarca> = {
-    "supabase/config.toml": {
-      categoria: "DEV",
-      motivo:
-        "config do Supabase LOCAL (o `supabase start` de dev e do CI). NÃO embarca na imagem e NÃO alcança clone nenhum: um self-hoster usa um projeto na nuvem do Supabase, cuja config de auth vem do marca-emails.sh, ou um GoTrue próprio, que lê env. `project_id` ainda nomeia os contêineres locais (supabase_auth_deskcomm-crm) e os assuntos são o que a suíte local envia",
-      marcas: ["deskcomm-crm", "deskcommcrm", "deskcommcrm"],
-    },
+    // AVIA: config.toml não fixa mais marca nenhuma (project_id "avia",
+    // subjects "AVIA") — a lista só encolhe, então a entrada foi removida.
   };
 
   const encontradoAqui = new Map<string, string[]>();

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200">
+  <rect width="640" height="200" rx="24" fill="#0A0B0F"/>
+  <path d="M70 150 L130 50 L190 150 L168 150 L130 84 L92 150 Z" fill="#A98A50"/>
+  <path d="M60 132 C 180 120, 300 90, 430 48 L 442 58 C 310 102, 190 132, 66 142 Z" fill="#226AAF"/>
+  <path d="M66 146 C 180 134, 300 104, 424 62 L 430 68 C 306 112, 190 142, 70 152 Z" fill="#F5F5F7"/>
+  <path d="M430 48 L470 34 L448 72 Z" fill="#226AAF"/>
+  <text x="250" y="132" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700" letter-spacing="8" fill="#F5F5F7">AVI<tspan fill="#A98A50">A</tspan></text>
+</svg>

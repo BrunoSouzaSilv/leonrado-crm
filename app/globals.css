@@ -25,41 +25,41 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ─────────────────────────────────────────────────────────────────────────
-   DeskcommCRM — Design System tokens (Sage palette · density Aerada)
+   AVIA — Design System tokens (paleta ouro · density Aerada)
    Source of truth: /app/design/lib/tokens.ts (PALETTES.sage)
    Light + dark drawn separately (NOT inverted).
    ───────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Surfaces (light) */
-  --color-bg: #faf9f6;
+  /* Surfaces (light) — AVIA */
+  --color-bg: #F5F5F7;
   --color-surface: #ffffff;
-  --color-surface-elevated: #f5f3ee;
-  --color-overlay: rgba(28, 26, 22, 0.42);
+  --color-surface-elevated: #ECECEF;
+  --color-overlay: rgba(10, 11, 15, 0.42);
 
-  /* Text (light) */
-  --color-text: #1c1a16;
-  --color-text-muted: #5d594f;
-  --color-text-subtle: #7d786c;
+  /* Text (light) — AVIA */
+  --color-text: #0A0B0F;
+  --color-text-muted: #55555e;
+  --color-text-subtle: #7a7a86;
 
-  /* Borders (light) */
-  --color-border: #e7e3da;
-  --color-border-strong: #d2cdbf;
+  /* Borders (light) — AVIA */
+  --color-border: #e2e2e8;
+  --color-border-strong: #c9c9d4;
 
-  /* Accent — Sage (11 stops) */
-  --color-accent-50:  #f3f6f1;
-  --color-accent-100: #e4ebe0;
-  --color-accent-200: #c8d6c1;
-  --color-accent-300: #a4ba9a;
-  --color-accent-400: #82a077;
-  --color-accent-500: #67885d;
-  --color-accent-600: #506d48;
-  --color-accent-700: #41573b;
-  --color-accent-800: #374731;
-  --color-accent-900: #2f3c2b;
-  --color-accent-950: #171f15;
+  /* Accent — AVIA ouro (11 stops, semente #A98A50 no grau 600) */
+  --color-accent-50:  #faf7ee;
+  --color-accent-100: #f1e7cf;
+  --color-accent-200: #e3d1a6;
+  --color-accent-300: #d2b97b;
+  --color-accent-400: #c0a25e;
+  --color-accent-500: #b39455;
+  --color-accent-600: #A98A50;
+  --color-accent-700: #8a6f3e;
+  --color-accent-800: #6f5a34;
+  --color-accent-900: #57452b;
+  --color-accent-950: #2b2114;
   --color-accent: var(--color-accent-600);
-  --color-accent-fg: #ffffff;
+  --color-accent-fg: #0A0B0F;
   --color-accent-soft: var(--color-accent-100);
   --color-accent-hover: var(--color-accent-700);
 
@@ -86,9 +86,9 @@
   --color-error: #a94a3c;
   --color-error-bg: rgba(169, 74, 60, 0.12);
   --color-error-fg: #8a3a2e;
-  --color-info: #4a7a93;
-  --color-info-bg: rgba(74, 122, 147, 0.12);
-  --color-info-fg: #355d72;
+  --color-info: #226AAF;
+  --color-info-bg: rgba(34, 106, 175, 0.12);
+  --color-info-fg: #1a4f82;
 
   /* Spacing (4-base) */
   --space-0: 0px;
@@ -250,17 +250,17 @@
    (lib/branding/css.ts), que só ganha consumidor com a tela de marca.
    ───────────────────────────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --color-bg: #faf9f6;
+  --color-bg: #F5F5F7;
   --color-surface: #ffffff;
-  --color-surface-elevated: #f5f3ee;
-  --color-overlay: rgba(28, 26, 22, 0.42);
-  --color-text: #1c1a16;
-  --color-text-muted: #5d594f;
-  --color-text-subtle: #7d786c;
-  --color-border: #e7e3da;
-  --color-border-strong: #d2cdbf;
+  --color-surface-elevated: #ECECEF;
+  --color-overlay: rgba(10, 11, 15, 0.42);
+  --color-text: #0A0B0F;
+  --color-text-muted: #55555e;
+  --color-text-subtle: #7a7a86;
+  --color-border: #e2e2e8;
+  --color-border-strong: #c9c9d4;
   --color-accent: var(--color-accent-600);
-  --color-accent-fg: #ffffff;
+  --color-accent-fg: #0A0B0F;
   --color-accent-soft: var(--color-accent-100);
   --color-accent-hover: var(--color-accent-700);
   --color-neutral-50: #faf9f6;
@@ -283,9 +283,9 @@
   --color-error: #a94a3c;
   --color-error-bg: rgba(169, 74, 60, 0.12);
   --color-error-fg: #8a3a2e;
-  --color-info: #4a7a93;
-  --color-info-bg: rgba(74, 122, 147, 0.12);
-  --color-info-fg: #355d72;
+  --color-info: #226AAF;
+  --color-info-bg: rgba(34, 106, 175, 0.12);
+  --color-info-fg: #1a4f82;
   --shadow-xs: 0 1px 2px 0 rgba(20, 18, 14, 0.04);
   --shadow-sm: 0 1px 2px 0 rgba(20, 18, 14, 0.05), 0 1px 1px 0 rgba(20, 18, 14, 0.03);
   --shadow-md: 0 4px 12px -2px rgba(20, 18, 14, 0.06), 0 2px 4px -1px rgba(20, 18, 14, 0.04);
@@ -327,36 +327,36 @@
 }
 
 [data-theme="dark"] {
-  /* Surfaces (dark — drawn) */
-  --color-bg: #161510;
-  --color-surface: #1d1c17;
-  --color-surface-elevated: #272620;
+  /* Surfaces (dark — AVIA) */
+  --color-bg: #0A0B0F;
+  --color-surface: #1B1C20;
+  --color-surface-elevated: #26272f;
   --color-overlay: rgba(0, 0, 0, 0.55);
 
-  /* Text (dark) */
-  --color-text: #f5f4ef;
-  --color-text-muted: #8e8b7f;
-  --color-text-subtle: #605e54;
+  /* Text (dark — AVIA) */
+  --color-text: #F5F5F7;
+  --color-text-muted: #a1a1b0;
+  --color-text-subtle: #6e6e7a;
 
-  /* Borders (dark) */
-  --color-border: #33312a;
-  --color-border-strong: #444239;
+  /* Borders (dark — AVIA) */
+  --color-border: #2a2b33;
+  --color-border-strong: #3d3e48;
 
   /* Accent stays same hex stops; default shifts up for dark contrast */
-  --color-accent-50:  #f3f6f1;
-  --color-accent-100: #e4ebe0;
-  --color-accent-200: #c8d6c1;
-  --color-accent-300: #a4ba9a;
-  --color-accent-400: #82a077;
-  --color-accent-500: #67885d;
-  --color-accent-600: #506d48;
-  --color-accent-700: #41573b;
-  --color-accent-800: #374731;
-  --color-accent-900: #2f3c2b;
-  --color-accent-950: #171f15;
+  --color-accent-50:  #faf7ee;
+  --color-accent-100: #f1e7cf;
+  --color-accent-200: #e3d1a6;
+  --color-accent-300: #d2b97b;
+  --color-accent-400: #c0a25e;
+  --color-accent-500: #b39455;
+  --color-accent-600: #A98A50;
+  --color-accent-700: #8a6f3e;
+  --color-accent-800: #6f5a34;
+  --color-accent-900: #57452b;
+  --color-accent-950: #2b2114;
   --color-accent: var(--color-accent-400);
-  --color-accent-fg: #161510;
-  --color-accent-soft: rgba(130, 160, 119, 0.16);
+  --color-accent-fg: #0A0B0F;
+  --color-accent-soft: rgba(169, 138, 80, 0.16);
   --color-accent-hover: var(--color-accent-300);
 
   /* Neutrals — greige (11 stops, dark) */
@@ -382,9 +382,9 @@
   --color-error: #c87263;
   --color-error-bg: rgba(200, 114, 99, 0.18);
   --color-error-fg: #d99182;
-  --color-info: #7da9bf;
-  --color-info-bg: rgba(125, 169, 191, 0.18);
-  --color-info-fg: #9bbfd2;
+  --color-info: #7fb3ec;
+  --color-info-bg: rgba(34, 106, 175, 0.22);
+  --color-info-fg: #a9c9ef;
 
   /* Shadows — heavier in dark */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.30);

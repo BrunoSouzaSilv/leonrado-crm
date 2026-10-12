@@ -1,0 +1,35 @@
+appId: com.avia.crm
+productName: AVIA
+copyright: © 2026 AVIA · Agência Outservice · Todos os direitos reservados
+files:
+  - main.js
+  - preload.js
+  - setup.html
+  - package.json
+extraResources:
+  - from: ../.next/standalone
+    to: server
+  - from: ../.next/static
+    to: server/.next/static
+  - from: ../public
+    to: server/public
+  - from: dist/node-runtime
+    to: node-runtime
+  - from: dist/worker.cjs
+    to: worker/worker.cjs
+  - from: dist/avia.env
+    to: avia.env
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icon.ico
+mac:
+  target:
+    - dmg
+  icon: build/icon.icns
+  category: public.app-category.business
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  shortcutName: AVIA

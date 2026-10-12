@@ -142,11 +142,11 @@ Assimétrico, não centralizado. Copy à esquerda ocupando ~42%, mesa à direita
 > **H1:** Sua operação comercial numa mesa só.
 > **E nada morre em cima dela.**
 >
-> **Sub:** Agentes de IA atendem no WhatsApp, qualificam o lead e movem o funil — com tudo registrado e auditável. No seu servidor, sem mensalidade por usuário.
+> **Sub:** Agentes de IA atendem no WhatsApp, qualificam o lead e movem o funil — com tudo registrado e auditável. No seu servidor.
 >
 > **CTA primário:** Instalar na minha VPS
 > **CTA secundário:** Ver o código no GitHub
-> **Microcopy:** Licença MIT · sem versão paga · roda numa VPS de 2 GB
+> **Microcopy:** Roda numa VPS de 2 GB
 
 A segunda linha do H1 é a frase que ancora a categoria. Ela vem da doutrina (`sistema-vivo.md`) e é a única promessa desta página que os concorrentes **não conseguem repetir sem mentir**.
 
@@ -300,7 +300,7 @@ Deliberadamente técnico e denso. O dono do negócio pula; o dev cético para aq
 | **Isolamento entre clientes é testado a cada alteração.** O CI sobe um Postgres limpo e roda 364 testes de invariante. Um deles cria duas organizações e prova que uma não vê nenhuma linha da outra — e um caso de controle prova antes que as linhas existem, senão o teste passaria com a tabela vazia. | `tests/invariants/rls-isolation.test.ts` |
 | **Sete verificações antes de cada envio, em ordem fixa e versionada.** Cada avaliação vira registro durável, exportável — inclusive as que barraram. | `lib/agent-engine/guardrails/before-send.ts` |
 | **Atualizar não quebra.** O caminho de atualização é testado: o schema é aplicado em banco novo e reaplicado em banco existente, provando idempotência. | `scripts/test-db.sh` |
-| **MIT, sem versão paga, sem funcionalidade travada.** O que você instala é o produto completo. | `LICENSE` |
+| **O que você instala é o produto completo.** | `LICENSE` |
 
 > **CTA do bloco:** ⭐ Dar uma estrela no GitHub — *é o que ajuda outras pessoas a encontrarem o projeto.* `[116 estrelas]`
 
@@ -334,7 +334,7 @@ Imagem: a mesma tela em duas marcas diferentes, lado a lado.
 
 ## 10. INSTALAÇÃO
 
-> **Título:** Um comando. Duas horas de configuração. Sem mensalidade nunca mais.
+> **Título:** Um comando. Duas horas de configuração. No seu servidor.
 
 Bloco de código real, copiável:
 

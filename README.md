@@ -7,10 +7,10 @@
   <img src="docs/brand/deskcomm-logo.svg" alt="Deskcomm CRM" width="420">
 </picture>
 
-# 🛠️ DeskcommCRM — o Sistema Operacional de Vendas com IA, open source, pro WhatsApp
+# 🛠️ AVIA — o Sistema Operacional de Vendas com IA, pro WhatsApp
 
-**Agentes de IA que atendem, qualificam e vendem no WhatsApp — dentro de um CRM open source rodando no seu servidor.**
-**Sem mensalidade, sem feature travada, seus dados com você. A alternativa aberta a Kommo, Octadesk e Intercom.**
+**Agentes de IA que atendem, qualificam e vendem no WhatsApp — dentro do seu CRM privado rodando no seu servidor.**
+**Agentes de IA que atendem, qualificam e vendem no WhatsApp — dentro do seu CRM privado, rodando no seu servidor.**
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript)](https://www.typescriptlang.org)
@@ -86,8 +86,8 @@ Se faltar Docker, o instalador pergunta e instala sozinho.
 |---|---|
 | **VPS com Docker** | [HostGator](https://www.hostgator.com.br/52708-141-3-52.html) (parceria) — ou qualquer VPS com Docker. 4 GB de RAM recomendados |
 | **Domínio** | Um registro **A** apontando pro IP da VPS (ex.: `crm.suaempresa.com.br`) |
-| **Banco** | Conta grátis no [supabase.com](https://supabase.com) — 3 chaves + connection string do **Session pooler** |
-| **IA** | Uma chave de **OpenRouter**, **Anthropic** ou **OpenAI** — o instalador pergunta qual você quer |
+| **Banco** | Conta no [supabase.com](https://supabase.com) — 3 chaves + connection string do **Session pooler** |
+| **IA** | Uma chave de **Anthropic**, **OpenAI**, **Google**, **Groq**, **OpenRouter**, **DeepSeek**, **Requesty** ou endpoint próprio — configurável por área do sistema na tela de Provedores |
 | **WhatsApp** | Seu número, conectado por QR code no onboarding (ou o canal oficial da Meta) |
 
 > 💡 **O Supabase pode ser criado pelo próprio instalador.** Exporte um
@@ -223,7 +223,7 @@ Passo a passo em linguagem simples: [`docs/ATUALIZANDO.md`](docs/ATUALIZANDO.md)
 | `reset-mfa.sh` | Remove o MFA de quem perdeu o celular |
 | `healthcheck.sh` | Diagnóstico de todos os serviços de uma vez |
 
-> **Backup importa:** o plano grátis do Supabase **não faz backup sozinho**. Vale agendar
+> **Backup importa:** o plano inicial do Supabase **não faz backup sozinho**. Vale agendar
 > `backup.sh` no cron diariamente. O `update.sh` já roda um backup antes de cada atualização.
 
 ### 🧹 Desinstalar (tirar esta aplicação do Docker)
@@ -263,10 +263,10 @@ O projeto nasceu como CRM de e-commerce e a comunidade o levou muito além: hoje
 - 🧠 **Agentes que se auto-aprimoram** — conversas resolvidas viram conhecimento novo; a tela de **Evolução da IA** mostra se o agente está melhorando, onde erra e o que falta ensinar; **Propostas** são melhorias que a IA sugere pra si mesma, aplicáveis como versão nova — sempre com gate humano.
 - 🧩 **Multi-nicho por design** — vocabulário configurável por pipeline: lead vira *Cliente*, *Paciente* ou *Comprador*; won vira *Pago*, *Agendado* ou *Fechado*. O mesmo core serve e-commerce (nosso berço, com integração Nuvemshop), clínica, imobiliária ou infoproduto.
 - 💬 **WhatsApp de duas formas** — por **QR code** (WAHA, multi-número, com anti-banimento: throttle + jitter + janela de horário) ou pelo **canal oficial da Meta** (Cloud API, com templates aprovados e sincronizados). Mídia via Storage, STOP detection.
-- 🔀 **Escolha sua IA** — OpenRouter, Anthropic ou OpenAI, decidido na instalação e trocável depois pela tela, **por parte do sistema** (o que conversa não precisa ser o que indexa).
+- 🔀 **Escolha sua IA** — Anthropic, OpenAI, Google, Groq, OpenRouter, DeepSeek, Requesty ou endpoint próprio compatível, decidido na instalação e trocável depois pela tela, **por parte do sistema** (o que conversa não precisa ser o que indexa).
 - 👥 **Governança de atendimento** — RBAC server-side de verdade, atribuição/transferência auditada, fila com rodízio, roteamento automático por intenção e escopo de visualização por papel.
 - 🏢 **Multi-tenant + LGPD by-design** — RLS em toda tabela tenant-aware com teste de isolamento como gate de CI; anonimização preferida sobre delete; audit append-only com retenção 5 anos.
-- 🖥️ **Self-hosted de verdade** — seus dados na sua VPS; instalação e atualização com 1 comando (ou 1 clique); sem versão paga, sem feature travada.
+- 🖥️ **Privado de verdade** — seus dados na sua VPS; instalação com 1 comando.
 
 ### 🔌 Webhooks & Automações
 
@@ -306,7 +306,7 @@ Toda tela tem porta na navegação — o CI reprova tela que existe mas em que s
 | **WhatsApp** | WAHA Plus (engine NOWEB) + Meta Cloud API | QR pra começar rápido; canal oficial pra escala |
 | **Filas** | `event_log` table + workers (cron) | Trigger de banco nunca faz HTTP |
 | **Rate limit** | Upstash Redis (sliding window) | Serverless, free tier suficiente |
-| **AI** | Vercel AI SDK v7 — OpenRouter, Requesty, Anthropic, OpenAI e Google | Instalador pergunta qual; troca depois pela tela |
+| **AI** | Vercel AI SDK v7 — Anthropic, OpenAI, Google, Groq, OpenRouter, DeepSeek, Requesty e endpoint próprio compatível | Instalador pergunta qual; troca depois pela tela |
 | **Validação** | Zod | Input externo, env, payloads |
 | **Observability** | Sentry (scrub em erro, transação, span e breadcrumb) | Telemetria opt-in no install |
 | **Hospedagem** | VPS com Docker (HostGator/SP na parceria) | App + WhatsApp + workers na sua máquina |
@@ -440,7 +440,7 @@ Entre os invariantes está o **teste de isolamento RLS**: cria 2 organizações,
 
 ## 🤝 Contribuindo
 
-Esse projeto é open source pra comunidade. Toda contribuição é bem-vinda — desde fix de typo em doc até feature nova.
+Toda contribuição é bem-vinda — desde fix de typo em doc até feature nova.
 
 **Antes de abrir PR:**
 
@@ -528,9 +528,8 @@ Este é um projeto **self-host**: cada pessoa roda o CRM na **própria infraestr
 - **Suporte é comunitário e "as-is".** Dúvidas e bugs entram como
   [Issues](https://github.com/melgarafael/DeskcommCRM/issues) ou
   [Discussions](https://github.com/melgarafael/DeskcommCRM/discussions). Não há SLA nem
-  suporte garantido — é open source mantido por boa vontade.
-- **Você é responsável pela sua instalação.** Atualizações não são automáticas (você clica
-  ou roda `update.sh` quando quiser), e manter/backup do seu servidor é com você.
+  suporte garantido.
+- **Você é responsável pela sua instalação.** Manter e fazer backup do seu servidor é com você.
 - **LGPD — atenção:** quem **hospeda** a instância é o **controlador** dos dados pessoais
   ali tratados (clientes, conversas, pedidos), com as obrigações legais decorrentes. Os
   mantenedores do projeto **não são** controladores nem operadores da sua instância, e não

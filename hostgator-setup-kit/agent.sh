@@ -8,6 +8,12 @@
 source "$(dirname "$0")/_common.sh"
 enter_project
 
+# AVIA — fork travado: atualizações automáticas DESLIGADAS de propósito.
+# O botão "Atualizar agora" não tem executor sem este agente, e é exatamente
+# isso que protege o rebrand (update.sh puxaria a imagem Deskcomm e apagaria a
+# marca AVIA). Para reativar manualmente, apague as 2 linhas abaixo.
+exit 0
+
 SECRET="${INTERNAL_CRON_SECRET:-${INTERNAL_SECRET:-}}"
 [ -n "$SECRET" ] || exit 0
 [ -n "${NEXT_PUBLIC_APP_URL:-}" ] || exit 0

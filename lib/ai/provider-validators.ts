@@ -280,6 +280,32 @@ export async function validateRequestyKey(apiKey: string): Promise<ValidationRes
 }
 
 /**
+ * A Groq prova a chave pelo `GET /openai/v1/models` AUTENTICADO: chave inválida
+ * devolve 401, chave boa devolve 200 com os modelos disponíveis, e nenhum token
+ * é gasto. O endpoint próprio do painel é provado pela geração real
+ * (`lib/instalacao/prova-de-credito.ts`), como nos outros validadores.
+ */
+export async function validateGroqKey(apiKey: string): Promise<ValidationResult> {
+  try {
+    const res = await timedFetch("https://api.groq.com/openai/v1/models", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, error: "auth_failed_401" };
+    }
+    if (!res.ok) {
+      return { ok: false, error: `provider_status_${res.status}` };
+    }
+    const json = (await res.json()) as { data?: { id?: string }[] };
+    const models = (json.data ?? []).map((m) => m.id ?? "").filter(Boolean);
+    return { ok: true, models };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.name : "network_error" };
+  }
+}
+
+/**
  * O Jev (TypeSafe AI) prova a chave pelo `GET /v1/models`, que EXIGE a
  * credencial (medido: 401 com chave falsa, 403 sem chave, 200 com a real) e não
  * gasta token. O formato do catálogo é `{ models: [{ name }] }`, diferente do
@@ -390,6 +416,8 @@ export function validateProviderKey(
       return validateDeepSeekKey(apiKey);
     case "requesty":
       return validateRequestyKey(apiKey);
+    case "groq":
+      return validateGroqKey(apiKey);
     case "custom":
       return validateCustomKey(apiKey, baseUrl);
     case "typesafe":

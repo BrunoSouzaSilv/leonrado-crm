@@ -58,7 +58,7 @@ const FIXTURE = [
 describe("extrairRegua — os pares saem do globals.css, nunca de lista à mão", () => {
   it("acha os dois temas, a rampa do produto e os neutros", () => {
     expect(REGUA.rampaDoProduto).toHaveLength(11);
-    expect(REGUA.rampaDoProduto[6]).toBe("#506d48");
+    expect(REGUA.rampaDoProduto[6]).toBe("#a98a50");
     expect(REGUA.claro.neutros).toHaveLength(11);
     expect(REGUA.escuro.neutros[9]).toBe("#161510");
     expect(REGUA.claro.base.map((b) => b.chave)).toEqual([

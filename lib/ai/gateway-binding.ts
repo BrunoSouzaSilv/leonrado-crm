@@ -26,7 +26,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 
-import { DEEPSEEK_ENDPOINT, REQUESTY_ENDPOINT } from "@/lib/agent-engine/edge/llm/providers";
+import { DEEPSEEK_ENDPOINT, GROQ_ENDPOINT, REQUESTY_ENDPOINT } from "@/lib/agent-engine/edge/llm/providers";
 import { fetchParaDestinoDaOrganizacao } from "@/lib/automation/destinos-internos-autorizados";
 import { decryptKey, byteaToBuffer } from "@/lib/crypto/aes_gcm";
 import { logger } from "@/lib/logger";
@@ -557,6 +557,11 @@ function instanciar(
       return createOpenAI({ apiKey, baseURL: baseUrl ?? DEEPSEEK_ENDPOINT })(modelId);
     case "requesty":
       return createOpenAI({ apiKey, baseURL: baseUrl ?? REQUESTY_ENDPOINT }).chat(modelId); // ver providers.ts
+    // Groq: inferência OpenAI-compatível. Sem este caso, uma organização em
+    // Groq cairia no `default` (null) e a pilha antiga seguiria para o
+    // padrão com aviso — a tela ofereceria um provedor que estes workers ignoram.
+    case "groq":
+      return createOpenAI({ apiKey, baseURL: baseUrl ?? GROQ_ENDPOINT }).chat(modelId); // ver providers.ts
     // Provedor personalizado (#1642): endpoint do operador. Sem `baseUrl` não
     // há onde ir — `null` deixa o chamador cair no padrão COM AVISO, que é o
     // contrato deste switch; inventar um endpoint seria mandar a chave do

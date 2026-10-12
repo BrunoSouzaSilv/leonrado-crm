@@ -1,0 +1,14 @@
+{
+  "name": "avia-desktop",
+  "version": "1.0.0",
+  "description": "AVIA — programa desktop (Windows/Mac)",
+  "main": "main.js",
+  "scripts": {
+    "dist-win": "electron-builder --win",
+    "dist-mac": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

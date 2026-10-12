@@ -34,7 +34,7 @@ export const SIMBOLO = {
 } as const;
 
 /**
- * O logotipo: símbolo + "Deskcomm" + "CRM", com o texto já convertido em
+ * O logotipo: símbolo + "AVIA", com o texto já convertido em
  * caminhos — não depende de fonte instalada nem de `@font-face`.
  */
 export const LOGOTIPO = {
@@ -98,6 +98,6 @@ export const LOGOTIPO = {
  * o nome e neutro 600/300 para o "CRM". Copiadas dos SVGs de `docs/brand/`.
  */
 export const CORES_DA_MARCA = {
-  claro: { simbolo: "#506d48", nome: "#1c1a16", sufixo: "#5d594f" },
-  escuro: { simbolo: "#82a077", nome: "#f5f4ef", sufixo: "#8e8b7f" },
+  claro: { simbolo: "#A98A50", nome: "#0A0B0F", sufixo: "#226AAF" },
+  escuro: { simbolo: "#A98A50", nome: "#F5F5F7", sufixo: "#8e8b7f" },
 } as const;

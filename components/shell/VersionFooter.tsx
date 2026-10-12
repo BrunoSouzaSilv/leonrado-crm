@@ -25,23 +25,24 @@ export function VersionFooter({
   if (!data?.current_version) return null;
 
   const label = data.current_version.replace(/^v/i, "");
-  // Só acende quando existe versão nova de verdade. `off_release` sozinho não
-  // conta: uma instalação de desenvolvimento sem versão publicada mais nova
-  // ficava com o ponto pulsando pra sempre, e o texto "Nova versão · " com o
-  // número vazio, apontando para uma tela que não tem o que oferecer.
-  const alerta = data.is_owner && data.update_available;
+  // AVIA — fork travado: nunca oferece atualização. Só exibe a versão.
+  const alerta = false;
 
   if (!alerta) {
     return (
-      <p
-        className={cn(
-          "px-3 py-1 text-[11px] text-muted-foreground",
-          collapsed && "px-0 text-center",
+      <div className={cn("space-y-1 px-3 py-1", collapsed && "px-0 text-center")}>
+        <p className="text-[11px] text-muted-foreground" title={`${t("Versão")} ${label}`}>
+          {collapsed ? label.split(".").slice(0, 2).join(".") : `${t("versão")} ${label}`}
+        </p>
+        {!collapsed && (
+          <p
+            className="text-[10px] leading-tight text-muted-foreground/80"
+            title="Desenvolvido por Agência Outservice (Dev. Bruno Vitally) · Titularidade e direitos de revenda: Leonardo Silva Santos"
+          >
+            © 2026 AVIA · Todos os direitos reservados
+          </p>
         )}
-        title={`${t("Versão")} ${label}`}
-      >
-        {collapsed ? label.split(".").slice(0, 2).join(".") : `${t("versão")} ${label}`}
-      </p>
+      </div>
     );
   }
 

@@ -43841,6 +43841,32 @@ on conflict (provider, model_id) do update set
   supports_tools = excluded.supports_tools,
   supports_vision = excluded.supports_vision;
 
+-- ---- Catálogo da Groq (AVIA) ----
+--
+-- Inferência OpenAI-compatível e rápida (Llama). Ids e preços aproximados do
+-- provedor (dólares por 1M convertidos para CENTAVOS por milhão). Como a
+-- DeepSeek/Requesty acima: `on conflict do update` para reaplicação idempotente.
+-- `llama-3.3-70b-versatile` é o default do provedor (é o que o instalador grava
+-- como default_model da organização quando AI_PROVIDER=groq).
+insert into public.ai_models
+  (provider, model_id, display_name, description, context_window,
+   input_price_per_million_cents, output_price_per_million_cents,
+   supports_tools, is_default_for_provider)
+values
+  ('groq', 'llama-3.3-70b-versatile', 'Llama 3.3 70B (Groq)',
+   'Default Groq — rápido e barato, com ferramentas.',
+   128000, 59, 79, true, true),
+  ('groq', 'llama-3.1-8b-instant', 'Llama 3.1 8B Instant (Groq)',
+   'Cheap/fast Groq — classificação e triagem.',
+   128000, 5, 8, true, false)
+on conflict (provider, model_id) do update set
+  display_name = excluded.display_name,
+  description = excluded.description,
+  input_price_per_million_cents = excluded.input_price_per_million_cents,
+  output_price_per_million_cents = excluded.output_price_per_million_cents,
+  supports_tools = excluded.supports_tools,
+  is_default_for_provider = excluded.is_default_for_provider;
+
 -- ---- menu lateral por EMPRESA (migration 0367, issue #1341) ----
 --
 -- `organizations.interface_settings` é a escolha da EMPRESA: o universo de portas

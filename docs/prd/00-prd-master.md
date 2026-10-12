@@ -15,26 +15,26 @@ referencia_arquitetural: docs/research/reference-synthesis.md
 
 ## 0. Nota de transição (2026-07) — de "CRM de e-commerce" para "AI Sales OS"
 
-Este PRD nasceu (v0.1, abril/2026) com o produto posicionado como **CRM operacional para e-commerce**. Após a abertura do código, a realidade da adoção mudou o produto: a maioria da comunidade roda o Deskcomm em **clínicas, infoprodutos, imobiliárias, agências e serviços**, e os pedidos de feature nos especializaram em **agentes de IA integrados via MCP**. O posicionamento vigente está em [`VISION.md`](../../VISION.md):
+Este PRD nasceu (v0.1, abril/2026) com o produto posicionado como **CRM operacional para e-commerce**. A realidade da adoção mudou o produto: a maioria das instalações roda em **clínicas, infoprodutos, imobiliárias, agências e serviços**, e os pedidos de feature nos especializaram em **agentes de IA integrados via MCP**. O posicionamento vigente está em [`VISION.md`](../../VISION.md):
 
-> **Sistema operacional de vendas open source com agentes de IA nativos e WhatsApp — self-hosted, multi-tenant, para qualquer negócio que vende conversando.**
+> **Sistema operacional de vendas com agentes de IA nativos e WhatsApp — privado, multi-tenant, para qualquer negócio que vende conversando.**
 
 Implicações de leitura deste documento e dos sub-PRDs:
 - **E-commerce passa de definição do produto a primeiro vertical.** Referências a Nuvemshop, pipeline de pedidos e vocabulário de e-commerce continuam válidas como o template do vertical de origem — o mecanismo que as generaliza é o `vocabulary` configurável por pipeline (Sub-PRD 02 §3.7).
-- **O modelo comercial é open source + infraestrutura** (parceria HostGator para self-host em VPS), não venda de assinatura. Menções a "modo SaaS" descrevem uma opção arquitetural preservada, não o plano comercial corrente.
+- **O modelo é operação privada em VPS**, não venda de assinatura. Menções a "modo SaaS" descrevem uma opção arquitetural preservada, não o plano corrente.
 - Requisitos, contratos e decisões técnicas dos sub-PRDs permanecem válidos — a arquitetura multi-tenant com `vocabulary` configurável foi o que permitiu a expansão multi-nicho sem refactor.
 
 ---
 
 ## 1. Sumário Executivo
 
-**O que é.** DeskcommCRM é um sistema operacional de vendas open source com agentes de IA nativos — um CRM operacional onde a IA atende, qualifica e move o funil junto com humanos. Unifica atendimento humano, agentes com RAG por tenant, gestão de pedidos/negócios e pipeline de pós-venda numa única plataforma multi-tenant, tendo WhatsApp como canal primário (via WAHA, API não-oficial). Nasceu especializado em e-commerce (vertical de origem, com integração Nuvemshop); hoje serve qualquer negócio que vende conversando — ver Nota de transição (§0).
+**O que é.** AVIA é um sistema operacional de vendas com agentes de IA nativos — um CRM operacional onde a IA atende, qualifica e move o funil junto com humanos. Unifica atendimento humano, agentes com RAG por tenant, gestão de pedidos/negócios e pipeline de pós-venda numa única plataforma multi-tenant, tendo WhatsApp como canal primário (via WAHA, API não-oficial). Nasceu especializado em e-commerce (vertical de origem, com integração Nuvemshop); hoje serve qualquer negócio que vende conversando — ver Nota de transição (§0).
 
 **Quem usa.** Cada pessoa opera as organizações às quais possui vínculo ativo, com papel próprio em cada uma. A administração da plataforma gerencia a instalação; quando precisa acompanhar dados de uma organização, abre uma sessão temporária de edição ou somente leitura, vinculada à sessão autenticada e auditada com o ator real. Esse acompanhamento não cria membership nem uma caixa unificada cross-tenant. O contrato vigente está em [`docs/support-sessions.md`](../support-sessions.md).
 
 **Quem é o cliente alvo (tenant).** PME brasileira que vende pelo WhatsApp — e-commerce, clínica, imobiliária, infoprodutor, agência ou serviço — na faixa de ~300 atendimentos/dia, 2–5 atendentes humanos e 1–2 números WhatsApp. O perfil de calibração original (e-commerce Nuvemshop com ~5 mil pedidos/mês) segue sendo a referência de carga.
 
-**Diferencial competitivo.** Quatro elementos juntos — ausentes nos concorrentes incumbentes (Kommo, Octadesk, Zendesk, Pipedrive, RD CRM):
+**Diferencial.** Quatro elementos juntos:
 1. **Agentes de IA operando o CRM** com RAG por tenant (FAQ + políticas do negócio + catálogo sincronizado + conversas resolvidas), não chatbot decorativo — com trilha de auto-aprimoramento: conversas resolvidas realimentam a base de conhecimento.
 2. **Multi-nicho por design**: pipeline, vocabulário e métricas configuráveis por tenant (`vocabulary` por pipeline) — o ciclo de e-commerce ("Carrinho abandonado → Pago → Enviado → Entregue → Pós-venda") é o template do vertical de origem, não o limite do produto.
 3. **MCP-ready**: arquitetura inclui MCP server (interno hoje; contrato público na Fase 2) com 19 tools canônicas pra LLMs operarem o sistema.
@@ -46,7 +46,7 @@ Implicações de leitura deste documento e dos sub-PRDs:
 
 ## 2. Problema & Visão
 
-### Problemas que o DeskcommCRM resolve
+### Problemas que o AVIA resolve
 
 1. **Atendimento desfragmentado.** PMEs hoje atendem via WhatsApp Web pessoal + planilha + memória do atendente. Sem histórico unificado, sem multi-atendente real, sem auditoria. Quando o atendente sai da empresa, o relacionamento com o cliente vai junto.
 
@@ -60,9 +60,9 @@ Implicações de leitura deste documento e dos sub-PRDs:
 
 ### Visão
 
-> "DeskcommCRM é o sistema operacional de vendas onde agentes de IA e humanos atendem juntos os clientes de qualquer negócio que vende pelo WhatsApp, com Customer 360° unificado, compliance LGPD nativa, operação multi-tenant pronta pra escala — e agentes que se auto-aprimoram a cada conversa resolvida."
+> "AVIA é o sistema operacional de vendas onde agentes de IA e humanos atendem juntos os clientes de qualquer negócio que vende pelo WhatsApp, com Customer 360° unificado, compliance LGPD nativa, operação multi-tenant pronta pra escala — e agentes que se auto-aprimoram a cada conversa resolvida."
 
-Em três anos: ser a resposta padrão pra "melhor CRM open source com agentes de IA e WhatsApp" — milhares de instâncias self-hosted (VPS HostGator como caminho recomendado), ecossistema de agentes plugados via MCP público, templates prontos por nicho (e-commerce, clínica, imobiliária, infoproduto), e o flywheel de auto-aprimoramento medido em produção. Posicionamento completo em [`VISION.md`](../../VISION.md).
+Em três anos: ser a resposta padrão pra "melhor CRM com agentes de IA e WhatsApp" — milhares de instalações privadas, ecossistema de agentes plugados via MCP público, templates prontos por nicho (e-commerce, clínica, imobiliária, infoproduto), e o flywheel de auto-aprimoramento medido em produção. Posicionamento completo em [`VISION.md`](../../VISION.md).
 
 ---
 
