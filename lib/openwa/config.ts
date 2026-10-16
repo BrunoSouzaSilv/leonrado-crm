@@ -4,12 +4,41 @@
  * DE PROPÓSITO fora de `channel_sessions`: a linha de sessão do canal (com o
  * provider `openwa` liberado na migration 0490) guarda o VÍNCULO número↔org;
  * aqui mora o ACESSO (base + chave cifrada + sessão ativa + token do webhook).
- * Chave cifrada em repouso com a infra de `lib/webhooks/secrets`
- * (`fn_encrypt_oauth`/`fn_decrypt_oauth`, só service_role).
+ * Chave cifrada em repouso com AES-256-GCM em Node (`AI_CRED_AES_KEY`,
+ * mesmo padrão de `ai_provider_credentials`) — de propósito SEM a infra de
+ * GUC do banco (`fn_encrypt_oauth`), que exige chave de servidor ausente em
+ * instalações Cloud.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { decryptWebhookSecret, encryptWebhookSecret } from "@/lib/webhooks/secrets";
+import { decryptKey, encryptKey } from "@/lib/crypto/aes_gcm";
+
+/** Cifra em Node (AES-256-GCM, `AI_CRED_AES_KEY`) — sem depender de GUC do banco. */
+async function cifrar(chave: string): Promise<string | null> {
+  try {
+    const { ciphertext, iv, tag } = encryptKey(chave);
+    return JSON.stringify({
+      ct: ciphertext.toString("hex"),
+      iv: iv.toString("hex"),
+      tag: tag.toString("hex"),
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function decifrar(envelope: string): Promise<string | null> {
+  try {
+    const j = JSON.parse(envelope) as { ct: string; iv: string; tag: string };
+    return decryptKey({
+      ciphertext: Buffer.from(j.ct, "hex"),
+      iv: Buffer.from(j.iv, "hex"),
+      tag: Buffer.from(j.tag, "hex"),
+    });
+  } catch {
+    return null;
+  }
+}
 
 export interface OpenwaConfig {
   base_url: string;
@@ -78,9 +107,9 @@ export async function salvarConfigOpenwa(
     if (patch.apiKey.trim().length === 0) {
       apiKeyEncrypted = atual.api_key_encrypted;
     } else {
-      const enc = await encryptWebhookSecret(admin, patch.apiKey.trim());
+      const enc = await cifrar(patch.apiKey.trim());
       if (enc === null) return { error: "cipher_unavailable" };
-      apiKeyEncrypted = enc.replace(/^\\x/, "");
+      apiKeyEncrypted = enc;
     }
   }
 
@@ -107,11 +136,13 @@ export async function salvarConfigOpenwa(
 
 /** Decifra a chave para uso server-side. null = sem chave utilizável. */
 export async function chaveOpenwa(
-  admin: SupabaseClient,
+  _admin: SupabaseClient,
   cfg: OpenwaConfig,
 ): Promise<string | null> {
   if (!cfg.api_key_encrypted) return null;
-  return decryptWebhookSecret(admin, cfg.api_key_encrypted);
+  // Legado: envelope antigo em bytea hex (se algum dia existiu por aqui).
+  if (cfg.api_key_encrypted.startsWith("\\x")) return null;
+  return decifrar(cfg.api_key_encrypted);
 }
 
 /**
