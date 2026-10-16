@@ -108,6 +108,7 @@ export {
   Lock,
   LockOpen,
   Receipt,
+  Rocket,
   Tag,
   Question,
   Keyboard,

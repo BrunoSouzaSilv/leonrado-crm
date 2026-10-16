@@ -51,6 +51,9 @@ describe("fronteira do padrão de nome de provider", () => {
     ["import { x } from '@/lib/waha/client'", "caminho de import"],
     ["meta_cloud", "outro provider do vocabulário"],
     ["graph.facebook.com", "host de provider"],
+    ["openwa", "provider novo (OpenWA): entra junto com o canal que o nomeia"],
+    ["OPENWA_API_KEY", "env var do provider novo"],
+    ["OpenwaClient", "identificador PascalCase do provider novo"],
   ])("reconhece %s (%s)", (texto) => {
     expect(nomeiaProvider(texto)).toBe(true);
   });

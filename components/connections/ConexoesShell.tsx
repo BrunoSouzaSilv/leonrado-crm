@@ -9,6 +9,7 @@ import { CanalOficialClient } from "./CanalOficialClient";
 import { CanalParceiroClient } from "./CanalParceiroClient";
 import { CanalVozClient } from "./CanalVozClient";
 import { ConnectionsClient } from "./ConnectionsClient";
+import { GatewayProprioTab } from "./GatewayProprioTab";
 import { TemplatesClient } from "./TemplatesClient";
 import { TemplatesParceiroClient } from "./TemplatesParceiroClient";
 import { TelefoniaClient } from "./TelefoniaClient";
@@ -64,7 +65,9 @@ export function ConexoesShell({
       ? "oficial"
       : abaParam === "parceiro"
         ? "parceiro"
-        : abaParam === "telefonia"
+        : abaParam === "gateway"
+          ? "gateway"
+          : abaParam === "telefonia"
           ? "telefonia"
           : abaParam === "voz"
             ? "voz"
@@ -103,6 +106,7 @@ export function ConexoesShell({
             porque no dia em que houver um segundo parceiro esta aba não muda.
             Aqui fica o CONCEITO; lá dentro o cartão diz de quem se trata. */}
         <TabsTrigger value="parceiro">{t("Provedor parceiro")}</TabsTrigger>
+        <TabsTrigger value="gateway">{t("Gateway próprio")}</TabsTrigger>
         <TabsTrigger value="telefonia">{t("Telefone")}</TabsTrigger>
         <TabsTrigger value="sociais">{t("Redes sociais")}</TabsTrigger>
         <TabsTrigger value="voz">{t("Chamada de voz")}</TabsTrigger>
@@ -164,6 +168,10 @@ export function ConexoesShell({
             <TemplatesParceiroClient />
           </TabsContent>
         </Tabs>
+      </TabsContent>
+
+      <TabsContent value="gateway" className="mt-0">
+        <GatewayProprioTab />
       </TabsContent>
 
       <TabsContent value="oficial" className="mt-0">

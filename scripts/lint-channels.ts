@@ -214,6 +214,36 @@ const KNOWN_DEBT: { reason: string; files: string[] }[] = [
       "a cópia de tela na fonte deixar de nomear o provider.",
     files: ["lib/i18n/dicionario.ts"],
   },
+  {
+    reason:
+      "Ações de auditoria do transporte OpenWA (`openwa.config_updated`, " +
+      "`openwa.envio_manual`): o feed precisa distinguir configuração de " +
+      "envio, e ação genérica apagaria essa distinção. Sai junto com a " +
+      "unificação do seam.",
+    files: ["lib/audit/actions.ts"],
+  },
+  {
+    reason:
+      "Transporte OpenWA (fatia mínima AVIA): `lib/openwa/`, rotas " +
+      "`app/api/v1/webhooks/openwa/*` e `app/api/v1/openwa/*`, e a aba OpenWA " +
+      "em Conexões. Mesma natureza de `lib/waha/` (já exceção): não são " +
+      "features perguntando identidade, são o próprio canal. A unificação no " +
+      "seam (`ChannelAdapter` + coluna de sessão) é trabalho da Fase 3; aqui " +
+      "o provider vive em `organizations.settings->'openwa'`, fora do CHECK de " +
+      "`channel_sessions`, de propósito.",
+    files: [
+      "lib/openwa/client.ts",
+      "lib/openwa/config.ts",
+      "lib/openwa/ingest.ts",
+      "app/api/v1/webhooks/openwa/[token]/route.ts",
+      "app/api/v1/openwa/status/route.ts",
+      "app/api/v1/openwa/qr/route.ts",
+      "app/api/v1/openwa/sessoes/route.ts",
+      "app/api/v1/openwa/config/route.ts",
+      "app/api/v1/openwa/enviar/route.ts",
+      "components/connections/GatewayProprioTab.tsx",
+    ],
+  },
 ];
 
 const DEBT = new Set(KNOWN_DEBT.flatMap((g) => g.files));

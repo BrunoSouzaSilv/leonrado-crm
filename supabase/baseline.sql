@@ -42966,6 +42966,37 @@ create policy followup_flow_pointers_delete on public.followup_flow_pointers
   using (organization_id in (select public.fn_user_org_ids())
          and public.fn_role_at_least(organization_id, 'manager'));
 
+-- ---- provider OpenWA, fatia mínima (migration 0490, AVIA) ----
+--
+-- Idêntico à migration: coluna nullable + duas CHECKs reeditadas. Sem função
+-- e sem grant, então não conflita com a VARREDURA anon logo abaixo (que proíbe
+-- `create function`/`grant to anon` depois dela). Reaplicável.
+alter table public.channel_sessions
+  add column if not exists openwa_session_id text;
+
+alter table public.channel_sessions
+  drop constraint if exists channel_sessions_provider_check;
+
+alter table public.channel_sessions
+  add constraint channel_sessions_provider_check
+  check (provider = any (array['waha'::text, 'meta_cloud'::text, 'zernio'::text, 'wacalls'::text, 'zernio_social'::text, 'datafy'::text, 'openwa'::text]));
+
+alter table public.channel_sessions
+  drop constraint if exists channel_sessions_provider_ref_check;
+
+alter table public.channel_sessions
+  add constraint channel_sessions_provider_ref_check check (
+    (provider = 'waha'       and waha_session_name    is not null) or
+    (provider = 'meta_cloud' and meta_phone_number_id is not null) or
+    (provider in ('zernio', 'zernio_social') and zernio_account_id is not null) or
+    (provider = 'wacalls'    and wacalls_session_id    is not null) or
+    (provider = 'datafy'     and datafy_phone_number_id is not null) or
+    (provider = 'openwa'     and openwa_session_id     is not null)
+  );
+
+notify pgrst, 'reload schema';
+
+
 -- ---- VARREDURA anon: função nova nasce exposta em quem ATUALIZA (migration 0116) ----
 --
 -- ⚠️ DE PROPÓSITO, NENHUMA FUNÇÃO É CRIADA DEPOIS DESTE BLOCO. Apêndice que cria

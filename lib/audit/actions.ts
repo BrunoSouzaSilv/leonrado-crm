@@ -111,6 +111,8 @@ export const AUDIT_ACTIONS = [
   "onboarding.ai_configured",
   "onboarding.team_invited",
   "onboarding.completed",
+  "openwa.config_updated",
+  "openwa.envio_manual",
   "tenant.onboarded",
   "conversation.created",
   "conversation.claimed",

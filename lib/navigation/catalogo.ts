@@ -382,6 +382,19 @@ export const NAV_CATALOG = [
     // na navegação" — a porta existia, era outra.
   },
   {
+    // Hub de configuração inicial (AVIA): WhatsApp (com QR), IA e teste, na
+    // ordem em que dão errado. Não duplica configuração — cada cartão leva à
+    // tela definitiva. Em "Sua empresa", atrás de Configurações, como as
+    // demais telas de settings/tenant que não são de acompanhamento diário.
+    href: "/app/settings/comecar",
+    label: "Começar",
+    description: "WhatsApp, IA e teste de ponta a ponta em três passos.",
+    icon: "Rocket",
+    group: "organizacao",
+    section: "Sua empresa",
+    minRole: "manager",
+  },
+  {
     href: "/app/settings/tenant/proposals",
     label: "Propostas",
     description: "Configure a validade padrão e condições para propostas comerciais.",
