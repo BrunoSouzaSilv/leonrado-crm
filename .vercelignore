@@ -1,29 +1,39 @@
 # Vercel builda do zero — o .next local não sobe.
-.next
+/.next
 
 # Artefatos e material que não pertence ao runtime do app.
-electron
-evidence
-node_modules/.cache
-node_modules/.pnpm
-supabase
-tests
-docs
-triagem
-loop
-e2e
-playwright-report
-test-results
+#
+# ⚠️ TODOS ancorados com `/` na frente, de propósito: sem a barra o gitignore
+# casa o nome em QUALQUER profundidade, e `supabase` sozinho já excluiu
+# `lib/supabase/` — o build remoto morreu com "Can't resolve
+# '@/lib/supabase/admin'" por causa disto.
+/electron
+/evidence
+/node_modules/.cache
+/node_modules/.pnpm
+/supabase
+/tests
+/docs
+/triagem
+/loop
+/e2e
+/playwright-report
+/test-results
+/hostgator-setup-kit
+/scripts
+/.vercel
+/.git
+/.github
+/Dockerfile
+/docker-compose.yml
+/docker-compose.*.yml
+
+# Logs e binários.
 *.log
 *.dmg
 *.zip
+
+# Segredos locais (o Vercel injeta os dele).
 .env
 .env.local
-.env*.local
-.vercel
-.git
-.github
-Dockerfile
-docker-compose*.yml
-hostgator-setup-kit
-scripts
+.env.*.local
