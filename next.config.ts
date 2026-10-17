@@ -126,7 +126,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+/**
+ * `SENTRY_DISABLE=1` pula o `withSentryConfig` inteiro.
+ *
+ * Existe porque o build REMOTO do Vercel morria com SIGKILL/OOM neste projeto:
+ * o plugin processa e faz upload dos source maps de um app grande, e o
+ * contêiner de build do Vercel (3 GB no Hobby) não segura. Medido: com o
+ * plugin desligado o mesmo build passa. O erro continua sendo capturado em
+ * runtime pelo `sentry.server.config.ts` — só o UPLOAD de source maps some.
+ */
+export default process.env.SENTRY_DISABLE === "1"
+  ? nextConfig
+  : withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

@@ -1,0 +1,29 @@
+# Vercel builda do zero — o .next local não sobe.
+.next
+
+# Artefatos e material que não pertence ao runtime do app.
+electron
+evidence
+node_modules/.cache
+node_modules/.pnpm
+supabase
+tests
+docs
+triagem
+loop
+e2e
+playwright-report
+test-results
+*.log
+*.dmg
+*.zip
+.env
+.env.local
+.env*.local
+.vercel
+.git
+.github
+Dockerfile
+docker-compose*.yml
+hostgator-setup-kit
+scripts
