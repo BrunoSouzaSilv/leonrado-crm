@@ -230,7 +230,13 @@ const KNOWN_DEBT: { reason: string; files: string[] }[] = [
       "features perguntando identidade, são o próprio canal. A unificação no " +
       "seam (`ChannelAdapter` + coluna de sessão) é trabalho da Fase 3; aqui " +
       "o provider vive em `organizations.settings->'openwa'`, fora do CHECK de " +
-      "`channel_sessions`, de propósito.",
+      "`channel_sessions`, de propósito. " +
+      "O hub guiado `/app/settings/comecar` e o visualizador de QR dele são a " +
+      "MESMA superfície de pareamento vista por outro ângulo: ela existe para " +
+      "dizer se o gateway proprio está pareado e mostrar o QR — perguntar isso " +
+      "por capacidade exigiria promover o transporte a `ChannelAdapter` antes da " +
+      "Fase 3, e a rota neutra resultante teria de re-exportar justamente o que a " +
+      "catraca proíbe nomear. Sai junto com o resto do grupo.",
     files: [
       "lib/openwa/client.ts",
       "lib/openwa/config.ts",
@@ -242,6 +248,8 @@ const KNOWN_DEBT: { reason: string; files: string[] }[] = [
       "app/api/v1/openwa/config/route.ts",
       "app/api/v1/openwa/enviar/route.ts",
       "components/connections/GatewayProprioTab.tsx",
+      "app/app/settings/comecar/page.tsx",
+      "components/settings/QrComecar.tsx",
     ],
   },
 ];
@@ -305,7 +313,7 @@ if (novos.length) {
       "identificador da sessão (`resolveSessionRef`) — nunca nomeie o provider.\n" +
       "\nSe a linha acusada for um COMENTÁRIO: a cerca não distingue comentário de\n" +
       "código, e isso é deliberado — separar exigiria remover comentários antes de\n" +
-      "casar, e um removedor de comentários apaga `\"http://waha:3000\"` e as URLs do\n" +
+      'casar, e um removedor de comentários apaga `"http://waha:3000"` e as URLs do\n' +
       "Graph que moram DENTRO de string, criando falso negativo (a mesma classe da\n" +
       "issue #118). Reescreva a prosa sem o nome: cite a seção da doutrina pelo\n" +
       "assunto (`a seção de anti-banimento`), não pelo provider.",
