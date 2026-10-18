@@ -17,6 +17,11 @@ describe("createDefaultRegistry", () => {
       "custom",
       "deepseek",
       "google",
+      // Groq: entra aqui como as demais OpenAI-compatíveis — `.chat()`, e
+      // endpoint próprio (`GROQ_ENDPOINT`). O registry já a tinha; quem faltava
+      // era a lista travada DESTE teste, travada justamente para o provider novo
+      // não entrar sem alguém conferir o par.
+      "groq",
       "openai",
       "openrouter",
       "requesty",
@@ -30,6 +35,10 @@ describe("createDefaultRegistry", () => {
     expect(() => reg.openrouter!("k", "meta-llama/llama-3.3-70b-instruct")).not.toThrow();
     expect(() => reg.deepseek!("k", "deepseek-flash")).not.toThrow();
     expect(() => reg.requesty!("k", "openai/gpt-4o-mini")).not.toThrow();
+    // Groq é OpenAI-compatível pela mesma via da OpenRouter: `.chat()` e
+    // endpoint próprio. Instanciar não pode lançar — é o que derrubaria todo
+    // turno antes de a chamada sair.
+    expect(() => reg.groq!("k", "llama-3.3-70b-versatile")).not.toThrow();
     // Endpoint próprio (gateway compatível, ou modelo local no roteiro).
     expect(() => reg.openrouter!("k", "x/y", "https://gateway.exemplo/v1")).not.toThrow();
     expect(() => reg.deepseek!("k", "deepseek-flash", "https://gateway.exemplo/v1")).not.toThrow();

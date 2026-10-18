@@ -2859,6 +2859,9 @@ export const DICIONARIO: Traducoes = {
   "Muito barata e desconta sozinha o trecho repetido da conversa, sem você configurar nada — o custo cai para quem atende com um roteiro que não muda.": {
     es: "Muy barata y descuenta sola la parte repetida de la conversación, sin que configures nada: el costo baja para quien atiende con un guion que no cambia.",
   },
+  "Inferência muito rápida (Llama e outros modelos open) com custo baixo — boa para atendimento em tempo real.": {
+    es: "Inferencia muy rápida (Llama y otros modelos open) con costo bajo — buena para atención en tiempo real.",
+  },
   "Endpoint seu que fala a API da OpenAI — OmniRouter, 9Router, LiteLLM hospedado ou proxy corporativo, num endereço público. Você informa o endereço (base URL) e a chave, e o CRM conversa com ele como conversa com a OpenAI.": {
     es: "Endpoint propio que habla la API de OpenAI — OmniRouter, 9Router, LiteLLM alojado o proxy corporativo, en una dirección pública. Tú informas la dirección (base URL) y la clave, y el CRM conversa con él como conversa con OpenAI.",
   },
