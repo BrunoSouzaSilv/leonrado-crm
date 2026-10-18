@@ -8,6 +8,7 @@ export function channelBrand(
     case "zernio":
     case "datafy":
     case "wacalls":
+    case "openwa":
       return "whatsapp";
     case "zernio_social":
       if (session.social_platform === "instagram") return "instagram";

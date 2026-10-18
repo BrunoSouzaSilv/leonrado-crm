@@ -110,6 +110,33 @@ export const CHANNEL_CAPABILITIES: Record<ProviderDeMensagem, ChannelCapabilitie
     costPerMessage: true,
     alteraMensagemEnviada: false,
   },
+  // OpenWA: engine WhatsApp Web auto-hospedada — mesma FÍSICA do WAHA (sem WABA,
+  // sem Meta por trás, transporte não-oficial), por isso o perfil de risco igual.
+  // As duas divergências abaixo são MEDIDAS, não estimativas:
+  //
+  //  - `groups: "none"` — a ingestão do app recusa `@g.us` com
+  //    `identidade_nao_enderecavel` (`lib/openwa/ingest.ts`), então conversa de
+  //    grupo nem nasce por este canal. Declarar "full" abriria botões que a
+  //    ponta de entrada já recusa.
+  //  - `alteraMensagemEnviada: false` — o painel expõe `messages/send-text` e o
+  //    adapter não implementa editar/apagar. "true" faria a tela oferecer uma
+  //    edição que o adapter não faz.
+  //
+  // `voiceNote` não é lido em produção (só declarado e assegurado em teste), e
+  // o valor é o conservador: preparamos o áudio em vez de assumir conversão no
+  // servidor — que de todo modo não existe, porque não há endpoint de mídia
+  // medido no painel (ver `lib/channels/adapters/openwa.ts`).
+  openwa: {
+    freeformOutsideWindow: true,
+    requiresTemplates: false,
+    canManageTemplates: false,
+    banRisk: true,
+    minIntervalMs: null,
+    voiceNote: "opus-only",
+    groups: "none",
+    costPerMessage: false,
+    alteraMensagemEnviada: false,
+  },
 };
 
 /**
@@ -136,6 +163,8 @@ export const CHANNEL_PROVIDER_ZERNIO: ChannelProvider = "zernio";
 export const CHANNEL_PROVIDER_DATAFY: ChannelProvider = "datafy";
 /** Chamada de voz WhatsApp (spec 18). Não transporta mensagem — ver abaixo. */
 export const CHANNEL_PROVIDER_WACALLS: ChannelProvider = "wacalls";
+/** Engine WhatsApp Web auto-hospedada (painel OpenWA) — o transporte da AVIA. */
+export const CHANNEL_PROVIDER_OPENWA: ChannelProvider = "openwa";
 
 /**
  * Os providers por onde MENSAGEM entra e sai — a única lista que responde
@@ -158,6 +187,7 @@ export const PROVIDERS_DE_MENSAGEM = [
   "zernio",
   "zernio_social",
   "datafy",
+  "openwa",
 ] as const satisfies readonly ProviderDeMensagem[];
 
 /**

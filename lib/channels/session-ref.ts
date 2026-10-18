@@ -15,7 +15,12 @@ export type ChannelSessionRef =
   | { provider: "waha"; waha_session_name: string }
   | { provider: "meta_cloud"; meta_phone_number_id: string }
   | { provider: "zernio" | "zernio_social"; zernio_account_id: string }
-  | { provider: "datafy"; datafy_phone_number_id: string };
+  | { provider: "datafy"; datafy_phone_number_id: string }
+  // O id da SESSÃO no painel OpenWA — a coluna que a migration 0490 tornou
+  // NOT NULL exatamente quando o provider é este. `waha_session_name` também
+  // guarda o mesmo valor na linha (mirante de `garantirLinhaDeSessao`), mas a
+  // coluna de ref do provider é esta: o CHECK do banco é quem manda.
+  | { provider: "openwa"; openwa_session_id: string };
 
 /**
  * Colunas que um `select` do PostgREST precisa trazer para `resolveSessionRef`
@@ -23,7 +28,7 @@ export type ChannelSessionRef =
  * nomeia coluna de provider, e ela some da feature junto com a decisão.
  */
 export const CHANNEL_SESSION_REF_COLUMNS =
-  "provider, waha_session_name, meta_phone_number_id, zernio_account_id, datafy_phone_number_id";
+  "provider, waha_session_name, meta_phone_number_id, zernio_account_id, datafy_phone_number_id, openwa_session_id";
 
 export function resolveSessionRef(session: ChannelSessionRef): string {
   switch (session.provider) {
@@ -41,5 +46,9 @@ export function resolveSessionRef(session: ChannelSessionRef): string {
     case "zernio_social":
     case "zernio":
       return session.zernio_account_id;
+    // O id da sessão no painel — é o primeiro argumento de
+    // `POST /api/sessions/:id/messages/send-text`.
+    case "openwa":
+      return session.openwa_session_id;
   }
 }

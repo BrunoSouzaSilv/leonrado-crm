@@ -47,6 +47,10 @@ const FONTE: Record<ProviderDeMensagem, FonteDeTemplates | null> = {
   // Parceiro Graph-compatível: os modelos são os da Cloud API, servidos por uma
   // rota própria (host/token do parceiro).
   datafy: "graph",
+  // Mesma razão do `waha`: texto livre a qualquer hora, sem WABA e sem catálogo
+  // — não há definição a listar, e um seletor ofereceria solução para um
+  // problema que este canal não tem.
+  openwa: null,
 };
 
 /** `null` quando este canal não trabalha com definições aprovadas. */
