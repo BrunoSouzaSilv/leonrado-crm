@@ -43,6 +43,21 @@ function comEnv(redisUrl: string, redisToken: string) {
       INTERNAL_SECRET: "",
     },
   }));
+  // O `checkOpenwa` lê `organizations` (service_role) para achar o bloco
+  // `openwa`. Sem instalação OpenWA configurada, o retorno é `[]` — e é o que
+  // este mock devolve: nenhuma ida à rede do admin client. O que se mede neste
+  // teste é o check do REDIS não tentar um endereço malformado; o banco não
+  // faz parte da pergunta, e deixá-lo ir à rede (URL fictícia do mock de env)
+  // pendurava o teste por 7s num host que não existe.
+  vi.doMock("@/lib/supabase/admin", () => ({
+    createAdminClient: () => ({
+      from: () => ({
+        select: () => ({
+          not: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }),
+        }),
+      }),
+    }),
+  }));
 }
 
 describe("GET /api/v1/health — o motivo aponta para o que precisa ser feito", () => {

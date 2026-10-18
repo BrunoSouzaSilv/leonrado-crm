@@ -1,5 +1,5 @@
 /**
- * GET /api/v1/health — Supabase, Redis e WAHA respondem?
+ * GET /api/v1/health — Supabase, Redis, WAHA e OpenWA respondem?
  *
  * ─── Por que cada check diz a CAUSA, e não só "down" ─────────────────────────
  * A versão anterior devolvia `error: "fetch failed"` — a mensagem que o `fetch`
@@ -20,13 +20,21 @@
  * internet o alvo exato de dois serviços que falam com o WhatsApp do cliente.
  * Então `target` só sai com `?verbose=1` mais o mesmo segredo interno dos crons:
  * quem opera o sistema vê para onde ele tentou ir; quem só passa na frente, não.
+ *
+ * ─── Por que `nao_configurado` é `ok` (e não mais `degraded`) ────────────────
+ * Integração que NINGUÉM CONTRATOU nesta instalação não é degradação: é ausência
+ * de contrato. Ver `integrazioneNaoContratada()`. O campo `skipped: true`
+ * mantém a diferença entre "testado e passou" e "não testado porque não existe".
  */
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { env } from "@/lib/env";
+import { criarClienteOpenwa, OpenwaHttpError } from "@/lib/openwa/client";
+import { chaveOpenwa, lerConfigOpenwa } from "@/lib/openwa/config";
 import { alvoDe, classificarFalhaDeAlcance, type FalhaDeAlcance } from "@/lib/net/alcance";
 import { validarConfigRedisRest } from "@/lib/redis-config";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { urlDoSupabaseNoServidor } from "@/lib/supabase/url-do-servidor";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +57,14 @@ type Check = {
   reason?: MotivoDeFalha;
   /** Protocolo + host + porta que tentamos. Só com `?verbose=1` autenticado. */
   target?: string;
+  /**
+   * A integração não existe nesta instalação: `nao_configurado`.
+   *
+   * Distingue "testado e passou" de "não testado porque ninguém contratou" —
+   * os dois saem `ok`, e só este carrega a marca. Sem ela, `ok` deixa de dizer
+   * se o serviço foi alcançado ou simplesmente não é procurado.
+   */
+  skipped?: boolean;
 };
 
 const TIMEOUT_MS = 3_000;
@@ -65,6 +81,37 @@ async function withTimeout<T>(p: Promise<T>, ms = TIMEOUT_MS): Promise<T> {
 /** Chegamos ao serviço, ele respondeu, e a resposta não serve. */
 function motivoDoStatusHttp(status: number): MotivoDeFalha {
   return status === 401 || status === 403 ? "credencial_recusada" : "resposta_inesperada";
+}
+
+/**
+ * Integração que NINGUÉM CONTRATOU nesta instalação: `nao_configurado`.
+ *
+ * ─── Por que deixou de ser `degraded` ───────────────────────────────────────
+ *
+ * Esta rota nasceu numa instalação self-host onde WAHA e Redis são o produto:
+ * não configurá-los é o sistema pela metade, e `degraded` era o sinal honesto.
+ *
+ * Mas o produto também se instala com UMA integração só — e aí o resto marcava
+ * degradado para sempre. Medido na instalação AVIA: `redis` e `waha` nunca
+ * serão configurados (o canal é OpenWA, sem fila e sem engine WAHA), e a
+ * resposta era `status: "degraded"` por semanas, com tudo funcionando. Um
+ * indicador que aponta problema inexistente desensina quem olha — e o defeito
+ * que ele causa é grave: no primeiro problema VERDADEIRO, ninguém acredita.
+ *
+ * ─── Por que `ok`, e não `degraded` nem `skipped` como status ───────────────
+ *
+ * `ok` porque não há nada a fazer: quem opera não precisa abrir o `.env` para
+ * uma integração que não vai usar. Mas o campo `reason` continua saindo com
+ * `nao_configurado`, e o novo `skipped: true` diz explicitamente que NÃO foi
+ * testado — a diferença entre "testado e passou" e "não testado porque não
+ * existe" continua legível para quem lê o JSON.
+ *
+ * O que NÃO muda: `configuracao_invalida` continua `down`. Configurado ERRADO
+ * é o produto contando com o Redis e não o tendo — o caso que este arquivo foi
+ * escrito para separar de "o serviço caiu", e ele segue separado.
+ */
+function integrazioneNaoContratada(): Check {
+  return { status: "ok", latency_ms: 0, reason: "nao_configurado", skipped: true };
 }
 
 async function checkSupabase(): Promise<Check> {
@@ -154,7 +201,7 @@ async function checkRedis(): Promise<Check> {
   const config = validarConfigRedisRest(url, token);
   if (!config.ok) {
     if (config.reason === "nao_configurado") {
-      return { status: "degraded", latency_ms: 0, error: "not_configured", reason: "nao_configurado" };
+      return integrazioneNaoContratada();
     }
     return {
       status: "down",
@@ -200,7 +247,7 @@ async function checkWaha(): Promise<Check> {
   const t0 = Date.now();
   const base = env.WAHA_API_BASE_URL;
   if (!base) {
-    return { status: "degraded", latency_ms: 0, error: "not_configured", reason: "nao_configurado" };
+    return integrazioneNaoContratada();
   }
   try {
     // /api/sessions valida conectividade E autenticação num tiro só. O WAHA Core não
@@ -228,6 +275,92 @@ async function checkWaha(): Promise<Check> {
       error: e instanceof Error ? e.message : String(e),
       reason: classificarFalhaDeAlcance(e),
       target: alvoDe(base),
+    };
+  }
+}
+
+/**
+ * O CANAL REAL desta instalação: o painel OpenWA.
+ *
+ * ─── Por que existe ────────────────────────────────────────────────────────
+ * Esta rota nasceu cobrindo Supabase + Redis + WAHA. Instalações que operam
+ * pelo OpenWA ficavam sem NENHUM check de canal: o painel podia estar fora do
+ * ar com a health respondendo `healthy`, porque o que ela media não era o que
+ * o app usava de verdade. Um health que não cobre o canal do produto não é
+ * health — é um ping no banco com outro nome.
+ *
+ * ─── Por que lê o BANCO, e não o .env ──────────────────────────────────────
+ * A config OpenWA é por organização (`organizations.settings->'openwa'`, em
+ * `lib/openwa/config.ts`), com a chave cifrada em repouso. Então o check
+ * decifra e fala com o painel do mesmo jeito que o adapter fala — se a chave
+ * no banco não decifra, quem opera precisa saber AGORA, e não na primeira
+ * mensagem que virar `failed`.
+ *
+ * ─── Por que pega só a PRIMEIRA org configurada ────────────────────────────
+ * Instalação single-tenant (o caso medido) tem uma. Multi-tenant: se múltiplas
+ * orgs configurarem canais diferentes, o check continua sendo um — a health
+ * mede a instalação, não cada locatário. Cobrir todas mudaria o contrato do
+ * aggregate por um caso ainda não vivido.
+ *
+ * Mesmo contrato do WAHA: `GET /api/sessions` valida conectividade E
+ * autenticação num tiro só, e o `withTimeout` de 3s da rota segura o teto de
+ * 45s do cliente.
+ */
+async function checkOpenwa(): Promise<Check> {
+  const t0 = Date.now();
+  const admin = createAdminClient();
+  try {
+    // Mesmo filtro de orgPorWebhookToken: orgs que TÊM bloco openwa.
+    const { data, error } = await admin
+      .from("organizations")
+      .select("id, settings")
+      .not("settings->openwa", "is", null)
+      .limit(1);
+    if (error) {
+      return {
+        status: "down",
+        latency_ms: Date.now() - t0,
+        error: error.message,
+        reason: "resposta_inesperada",
+      };
+    }
+    const org = (data ?? [])[0] as { id: string } | undefined;
+    if (!org) return integrazioneNaoContratada();
+
+    const cfg = await lerConfigOpenwa(admin, org.id);
+    if (!cfg.base_url) return integrazioneNaoContratada();
+
+    const chave = await chaveOpenwa(admin, cfg);
+    if (!chave) {
+      // Configurou o endereço, não a chave (ou a chave não decifra). Isso é
+      // o caso que separa "abra o editor" de "reinicie o serviço": quem opera
+      // precisa ir ao painel de conexões, não ao terminal.
+      return {
+        status: "degraded",
+        latency_ms: Date.now() - t0,
+        error: "api_key_ausente_ou_indecifravel",
+        reason: "configuracao_invalida",
+        target: alvoDe(cfg.base_url),
+      };
+    }
+
+    const cliente = criarClienteOpenwa(cfg.base_url, chave);
+    await withTimeout(cliente.sessoes());
+    return { status: "ok", latency_ms: Date.now() - t0, target: alvoDe(cfg.base_url) };
+  } catch (e) {
+    if (e instanceof OpenwaHttpError) {
+      return {
+        status: "down",
+        latency_ms: Date.now() - t0,
+        error: e.message,
+        reason: e.status === null ? classificarFalhaDeAlcance(e) : motivoDoStatusHttp(e.status),
+      };
+    }
+    return {
+      status: "down",
+      latency_ms: Date.now() - t0,
+      error: e instanceof Error ? e.message : String(e),
+      reason: classificarFalhaDeAlcance(e),
     };
   }
 }
@@ -290,15 +423,21 @@ function semAlvo(check: Check): Check {
 }
 
 export async function GET(req: NextRequest) {
-  const [supabase, redis, waha] = await Promise.all([
+  const [supabase, redis, waha, openwa] = await Promise.all([
     checkSupabase(),
     checkRedis(),
     checkWaha(),
+    checkOpenwa(),
   ]);
 
   const verboso = req.nextUrl.searchParams.get("verbose") === "1" && segredoInternoConfere(req);
   const filtrar = verboso ? (c: Check) => c : semAlvo;
-  const checks = { supabase: filtrar(supabase), redis: filtrar(redis), waha: filtrar(waha) };
+  const checks = {
+    supabase: filtrar(supabase),
+    redis: filtrar(redis),
+    waha: filtrar(waha),
+    openwa: filtrar(openwa),
+  };
 
   const anyDown = Object.values(checks).some((c) => c.status === "down");
   const anyDegraded = Object.values(checks).some((c) => c.status === "degraded");
