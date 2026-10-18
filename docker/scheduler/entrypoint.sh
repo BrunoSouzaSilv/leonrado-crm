@@ -63,6 +63,15 @@ CRONS="
 * * * * *|45|api/v1/cron/event-log-drain
 * * * * *|25|api/v1/cron/routing-worker
 * * * * *|25|api/v1/cron/recover-stuck-messages
+# O TURNO DO AGENTE. Existe porque o agent-worker (processo longo) é o outro
+# consumidor desta fila, e uma instalação gerenciada sem contêiner nenhum não o
+# tem. Aqui o mesmo caminho — reapero, dreno, claim e turno — roda como função.
+# Timeout 295 e não 300: o curl tem de desistir ANTES de a função estourar o
+# maxDuration dela, senão a resposta se perde e ninguém vê erro.
+# Com o webhook em after() acordando isto em segundos, o minuto do crontab é a
+# REDE DE SEGURANÇA, não o caminho primário: um acordar perdido é processado
+# aqui em até 60s.
+* * * * *|295|api/v1/cron/agent-turns
 * * * * *|25|api/v1/cron/proposta-travada
 * * * * *|45|api/v1/cron/webhook-replay
 */5 * * * *|25|api/v1/cron/storage-redaction?limit=50
