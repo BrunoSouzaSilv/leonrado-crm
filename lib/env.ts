@@ -28,9 +28,7 @@ const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
  * pra permitir setup parcial (ex: dev sem WAHA quando trabalhando só na UI).
  */
 const required = (name: string) =>
-  isProd
-    ? z.string().min(1, `${name} é obrigatória em produção`)
-    : z.string().default("");
+  isProd ? z.string().min(1, `${name} é obrigatória em produção`) : z.string().default("");
 
 const requiredAlways = (name: string) => z.string().min(1, `${name} é obrigatória`);
 
@@ -142,7 +140,11 @@ const schema = z.object({
   CPF_ENCRYPTION_KEY: required("CPF_ENCRYPTION_KEY"),
   // Opcional (template genérico) — só necessária ao ligar NUVEMSHOP_ENABLED.
   NUVEMSHOP_OAUTH_ENCRYPTION_KEY: z.string().optional().default(""),
-  WAHA_BYO_ENCRYPTION_KEY: required("WAHA_BYO_ENCRYPTION_KEY"),
+  // Opcional (motor legado) — só necessária a quem pareia QR pelo canal próprio.
+  // Nesta instalação o canal é o OpenWA e este motor não roda, então não há
+  // credencial BYO a cifrar; mantê-la obrigatória amarraria o boot a uma env de
+  // um serviço que ninguém liga.
+  WAHA_BYO_ENCRYPTION_KEY: z.string().optional().default(""),
   /**
    * AES-256-GCM key (32 bytes em base64) usada pra cifrar API keys em
    * `ai_provider_credentials`. Em produção é obrigatória; em dev a default vazia
@@ -168,10 +170,23 @@ const schema = z.object({
    */
   SUPABASE_DB_ADMIN_URL: z.string().optional().default(""),
 
-  // WAHA
-  WAHA_API_BASE_URL: required("WAHA_API_BASE_URL"),
-  WAHA_API_KEY: required("WAHA_API_KEY"),
-  WAHA_WEBHOOK_BASE_URL: required("WAHA_WEBHOOK_BASE_URL"),
+  /**
+   * Motor legado por QR. O canal desta instalação é o OpenWA (aba "Gateway
+   * próprio"), e este motor não roda aqui — portanto NUNCA `required()`.
+   *
+   * Mesmo tratamento do WaCalls, que nasce desligado no compose e abaixo nunca
+   * é exigido. Exigir `min(1)` em produção amarrava o boot inteiro a um serviço
+   * que não existe, e o único jeito de "desligar" o canal virava escolher entre
+   * derrubar o app ou mentir com um endereço inválido.
+   *
+   * O contrato de desligado já existe e é honrado: `getWahaClient()` devolve
+   * `null` para string vazia, `checkWaha()` devolve `degraded`/`nao_configurado`
+   * (que NÃO vira 503) e cada rota devolve `waha_not_configured` explícito. Vazio
+   * aqui é ausência declarada de um canal, não uma falha.
+   */
+  WAHA_API_BASE_URL: z.string().optional().default(""),
+  WAHA_API_KEY: z.string().optional().default(""),
+  WAHA_WEBHOOK_BASE_URL: z.string().optional().default(""),
   // Segredo com que o WAHA assina os webhooks. O compose já o entrega ao
   // contêiner do WAHA; o app precisa dele para CONFERIR a assinatura — e não o
   // declarava aqui, então nunca teve como verificar nada.
@@ -496,14 +511,8 @@ const schema = z.object({
     .transform((v) => v === "true"),
 
   // App URLs
-  NEXT_PUBLIC_APP_URL: z
-    .string()
-    .url()
-    .default("http://localhost:3000"),
-  NEXT_PUBLIC_ADMIN_URL: z
-    .string()
-    .url()
-    .default("http://localhost:3000"),
+  NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+  NEXT_PUBLIC_ADMIN_URL: z.string().url().default("http://localhost:3000"),
   /**
    * URL pública opcional para os webhooks da Meta (WhatsApp Cloud API / canais oficiais).
    * Quando definida, é usada no lugar de NEXT_PUBLIC_APP_URL para compor a URL de callback

@@ -62,18 +62,24 @@ export function ConexoesShell({
     abaParam === "sociais"
       ? "sociais"
       : abaParam === "oficial"
-      ? "oficial"
-      : abaParam === "parceiro"
-        ? "parceiro"
-        : abaParam === "gateway"
-          ? "gateway"
-          : abaParam === "telefonia"
-          ? "telefonia"
-          : abaParam === "voz"
-            ? "voz"
-            : abaParam === "graph" && graphParceiro
-              ? "graph"
-              : "numeros";
+        ? "oficial"
+        : abaParam === "parceiro"
+          ? "parceiro"
+          : abaParam === "gateway"
+            ? "gateway"
+            : abaParam === "telefonia"
+              ? "telefonia"
+              : abaParam === "voz"
+                ? "voz"
+                : abaParam === "graph" && graphParceiro
+                  ? "graph"
+                  : // Sem a instalação ligar o motor de QR, "numeros" seria uma aba
+                    // que não existe: cair nela por default mostrava uma tela
+                    // desabilitada a quem chegava sem parâmetro nenhum. O canal que
+                    // esta instalação usa passa a ser o de chegada.
+                    wahaConfigured
+                    ? "numeros"
+                    : "gateway";
   const sub = params.get("sub") === "templates" ? "templates" : "conexao";
 
   const irPara = (proximaAba: string, proximaSub?: string): void => {
@@ -99,7 +105,11 @@ export function ConexoesShell({
             a frase custou menos que abrir exceção no gate, e o gate continua
             estrito: o dia em que alguém escrever o nome do provider aqui DE VERDADE,
             ele reprova igual. */}
-        <TabsTrigger value="numeros">{t("Números por QR")}</TabsTrigger>
+        {/* A aba só existe quando a instalação liga o motor de QR. Mostrá-la
+            desligada entregava a quem chegava uma tela inteira desabilitada e um
+            aviso mandando subir um contêiner — o canal desta instalação é outro,
+            e é nele que a tela tem de abrir. */}
+        {wahaConfigured && <TabsTrigger value="numeros">{t("Números por QR")}</TabsTrigger>}
         <TabsTrigger value="oficial">{t("API Oficial (Meta)")}</TabsTrigger>
         {/* "Provedor parceiro" e não a marca: o rótulo da marca vem do servidor
             (`lib/channels/connect`), porque a tela não pode nomear provider — e
@@ -120,7 +130,9 @@ export function ConexoesShell({
       <TabsContent value="telefonia" className="mt-0">
         <TelefoniaClient />
       </TabsContent>
-      <TabsContent value="sociais" className="mt-0"><RedesSociaisClient /></TabsContent>
+      <TabsContent value="sociais" className="mt-0">
+        <RedesSociaisClient />
+      </TabsContent>
 
       <TabsContent value="voz" className="mt-0">
         <CanalVozClient wacallsConfigured={wacallsConfigured} />
@@ -131,7 +143,11 @@ export function ConexoesShell({
           {/* Sub-abas como nas demais: conectar e gerenciar modelos são tarefas
               diferentes. O componente de modelos é o MESMO do outro parceiro,
               apontado para a rota desta fonte. */}
-          <Tabs value={sub} onValueChange={(v) => irPara("graph", v)} className="flex flex-col gap-4">
+          <Tabs
+            value={sub}
+            onValueChange={(v) => irPara("graph", v)}
+            className="flex flex-col gap-4"
+          >
             <TabsList>
               <TabsTrigger value="conexao">{t("Conexão")}</TabsTrigger>
               <TabsTrigger value="templates">{t("Modelos")}</TabsTrigger>
@@ -156,7 +172,11 @@ export function ConexoesShell({
             só faz a segunda sumir abaixo da dobra. O rótulo diz "do parceiro"
             para não colidir com "Templates" da barra lateral, que significa
             OUTRA coisa (respostas rápidas do atendente). */}
-        <Tabs value={sub} onValueChange={(v) => irPara("parceiro", v)} className="flex flex-col gap-4">
+        <Tabs
+          value={sub}
+          onValueChange={(v) => irPara("parceiro", v)}
+          className="flex flex-col gap-4"
+        >
           <TabsList>
             <TabsTrigger value="conexao">{t("Conexão")}</TabsTrigger>
             <TabsTrigger value="templates">{t("Modelos do parceiro")}</TabsTrigger>
@@ -175,7 +195,11 @@ export function ConexoesShell({
       </TabsContent>
 
       <TabsContent value="oficial" className="mt-0">
-        <Tabs value={sub} onValueChange={(v) => irPara("oficial", v)} className="flex flex-col gap-4">
+        <Tabs
+          value={sub}
+          onValueChange={(v) => irPara("oficial", v)}
+          className="flex flex-col gap-4"
+        >
           <TabsList>
             <TabsTrigger value="conexao">{t("Conexão")}</TabsTrigger>
             {/* "Templates da Meta", não "Templates": a barra lateral já tem um item
