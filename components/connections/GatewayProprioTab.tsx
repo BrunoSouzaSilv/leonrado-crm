@@ -46,6 +46,14 @@ export function GatewayProprioTab() {
   const [novaSessao, setNovaSessao] = useState("");
   const [qr, setQr] = useState<string | null>(null);
   const [qrDe, setQrDe] = useState<string | null>(null);
+  /**
+   * O motor foi reiniciado para emitir QR novo e ainda não voltou (~8s).
+   *
+   * Sem este estado a tela ficaria com o QR anterior na imagem, e a pessoa
+   * escanearia um código que o WhatsApp já rejeita — lendo como "o QR não
+   * funciona". Com ele, a imagem some e o texto diz o que está rolando.
+   */
+  const [renovando, setRenovando] = useState(false);
   const [destino, setDestino] = useState("");
   const [textoTeste, setTextoTeste] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -69,14 +77,23 @@ export function GatewayProprioTab() {
     let vivo = true;
     const id = setInterval(async () => {
       try {
-        const r = await apiClient.get<{ data: { qr?: string } }>(
+        const r = await apiClient.get<{ data: { qr?: string | null; reiniciando?: boolean } }>(
           `/api/v1/openwa/qr?session=${encodeURIComponent(qrDe)}`,
         );
         if (!vivo) return;
-        if (r.data.qr) setQr(r.data.qr);
+        if (r.data.reiniciando) {
+          // Motor reiniciando: some a imagem pra não servir código morto e
+          // deixa o próximo poll buscar o QR novo.
+          setQr(null);
+          setRenovando(true);
+        } else if (r.data.qr) {
+          setQr(r.data.qr);
+          setRenovando(false);
+        }
         const st = await apiClient.get<{ data: { itens: Sessao[] } }>("/api/v1/openwa/status");
         if (st.data.itens.find((s) => s.id === qrDe && s.status === "ready")) {
           setQrDe(null);
+          setRenovando(false);
           carregar();
         }
       } catch {
@@ -106,14 +123,22 @@ export function GatewayProprioTab() {
     }
   }
 
-  async function verQr(id: string, renovar = false) {
+  async function verQr(id: string, reiniciar = false) {
     try {
-      const r = await apiClient.get<{ data: { qr?: string; renovado?: boolean } }>(
-        `/api/v1/openwa/qr?session=${encodeURIComponent(id)}${renovar ? "&renovar=1" : ""}`,
+      const r = await apiClient.get<{ data: { qr?: string | null; reiniciando?: boolean } }>(
+        `/api/v1/openwa/qr?session=${encodeURIComponent(id)}${reiniciar ? "&renovar=1" : ""}`,
       );
-      if (r.data.qr) {
+      if (r.data.reiniciando) {
+        // O motor foi reiniciado pra gerar QR novo e ainda não voltou. Liga o
+        // polling — ele busca o QR novo em ~15s — em vez de mostrar erro.
+        setQr(null);
+        setQrDe(id);
+        setRenovando(true);
+        toast(t("Renovando o QR — o novo aparece em instantes."));
+      } else if (r.data.qr) {
         setQr(r.data.qr);
         setQrDe(id);
+        setRenovando(false);
       } else {
         toast.error(t("QR ainda não disponível — aguarde o motor subir."));
       }
@@ -216,6 +241,20 @@ export function GatewayProprioTab() {
             )}
           </div>
         ))}
+        {/* Motor reiniciando: a imagem some de propósito. Servir o QR anterior
+            significaria mostrar um código que o WhatsApp já recusou, e a pessoa
+            tentaria escanear de novo achando que errou o gesto. */}
+        {renovando && !qr && (
+          <div className="flex flex-col items-center gap-2 py-4">
+            <span
+              aria-hidden
+              className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("Renovando o QR — o novo aparece em instantes.")}
+            </p>
+          </div>
+        )}
         {qr && (
           <div className="flex flex-col items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -228,7 +267,7 @@ export function GatewayProprioTab() {
               variant="outline"
               size="sm"
               onClick={() => qrDe && verQr(qrDe, true)}
-              disabled={!qrDe}
+              disabled={!qrDe || renovando}
             >
               {t("Renovar QR")}
             </Button>

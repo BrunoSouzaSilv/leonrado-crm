@@ -1367,6 +1367,10 @@ export const DICIONARIO: Traducoes = {
     es: "QR aún no disponible — esperá a que suba el motor.",
   },
   "Não consegui buscar o QR.": { es: "No pude obtener el QR." },
+  "Renovar QR": { es: "Renovar QR" },
+  "Renovando o QR — o novo aparece em instantes.": {
+    es: "Renovando el QR — el nuevo aparece en instantes.",
+  },
   "Nova sessão: nome": { es: "Nueva sesión: nombre" },
   "Sessão criada. Escaneie o QR.": { es: "Sesión creada. Escaneá el QR." },
   "Falhou ao criar.": { es: "Falló al crear." },
