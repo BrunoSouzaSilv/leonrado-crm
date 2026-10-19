@@ -32,6 +32,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 
 /**
+ * O reinício fala com o painel quatro vezes — `sessao`, `stop`, `start` e o
+ * primeiro `qr` — e esse painel mede 4-9s por chamada quando está lento
+ * (medido em produção). Sem folga, a Vercel derruba a função no padrão de 10s
+ * com ECONNRESET, e a tela fica sem QR nenhum — era exatamente o que o cliente
+ * via. As outras rotas do projeto já declararam a sua; esta ficou de fora.
+ */
+export const maxDuration = 60;
+
+/**
  * Idade do `updatedAt` mínima para aceitar o QR como atual.
  *
  * O WhatsApp expira o código em ~20-60s, mas o painel também troca o QR sozinho
