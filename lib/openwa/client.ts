@@ -37,6 +37,14 @@ export interface OpenwaSession {
   name: string;
   status: string;
   phone: string | null;
+  /**
+   * Última transição de estado vista pelo painel (ISO). Medido no v0.23.x.
+   *
+   * É a única fonte de IDADE do QR: o painel não expõe quando emitiu o
+   * código, e devolve o mesmo `qrCode` estático enquanto a sessão vive. Sem
+   * esta data, a rota do QR não tem como saber que o código já venceu.
+   */
+  updatedAt?: string;
 }
 
 export function criarClienteOpenwa(baseUrl: string, apiKey: string) {
@@ -73,6 +81,40 @@ export function criarClienteOpenwa(baseUrl: string, apiKey: string) {
       const j = await ler(res, "qr");
       const qr = (j.qrCode ?? j.qr ?? null) as string | null;
       return typeof qr === "string" && qr.length > 0 ? qr : null;
+    },
+    /**
+     * Para e religa o motor da sessão.
+     *
+     * ─── Por que isto existe ─────────────────────────────────────────────────
+     * Medido contra o painel v0.23.x: `GET /sessions/:id/qr` devolve o MESMO
+     * `qrCode` estático enquanto a sessão vive — o hash não muda de uma chamada
+     * para a outra. O WhatsApp, porém, expira o código em ~20-60s. Depois
+     * disso o painel segue servindo a MESMA imagem morta, e o app mostra um QR
+     * que o celular rejeita com "código expirado" — o usuário lê como "não
+     * gera o QR", porque na tela há um QR que não funciona.
+     *
+     * Parar e iniciar gera um código novo em ~8s (medido: hash trocou). É o
+     * único caminho que o painel expõe para renovar — não há endpoint de
+     * refresh.
+     */
+    async reiniciarSessao(id: string): Promise<void> {
+      await fetch(url(`/api/sessions/${id}/stop`), {
+        method: "POST",
+        headers,
+        body: "{}",
+        ...comTempo(),
+      }).catch(() => {});
+      await fetch(url(`/api/sessions/${id}/start`), {
+        method: "POST",
+        headers,
+        body: "{}",
+        ...comTempo(),
+      }).catch(() => {});
+    },
+    /** Estado crua da sessão, para a rota do QR decidir se precisa renovar. */
+    async sessao(id: string): Promise<OpenwaSession> {
+      const res = await fetch(url(`/api/sessions/${id}`), { headers, ...comTempo() });
+      return (await ler(res, "sessao")) as unknown as OpenwaSession;
     },
     async enviarTexto(id: string, chatId: string, text: string): Promise<unknown> {
       const res = await fetch(url(`/api/sessions/${id}/messages/send-text`), {

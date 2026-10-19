@@ -106,10 +106,10 @@ export function GatewayProprioTab() {
     }
   }
 
-  async function verQr(id: string) {
+  async function verQr(id: string, renovar = false) {
     try {
-      const r = await apiClient.get<{ data: { qr?: string } }>(
-        `/api/v1/openwa/qr?session=${encodeURIComponent(id)}`,
+      const r = await apiClient.get<{ data: { qr?: string; renovado?: boolean } }>(
+        `/api/v1/openwa/qr?session=${encodeURIComponent(id)}${renovar ? "&renovar=1" : ""}`,
       );
       if (r.data.qr) {
         setQr(r.data.qr);
@@ -221,6 +221,17 @@ export function GatewayProprioTab() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qr} alt={t("QR de pareamento")} className="h-56 w-56 rounded bg-white p-2" />
             <p className="text-xs text-muted-foreground">{t("Atualiza sozinho até conectar.")}</p>
+            {/* O WhatsApp expira o código em ~1 minuto. Sem este botão, quem
+                escaneia um QR vencido não tem como pedir outro — a tela mostra
+                uma imagem que o celular rejeita, e não há saída visível. */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => qrDe && verQr(qrDe, true)}
+              disabled={!qrDe}
+            >
+              {t("Renovar QR")}
+            </Button>
           </div>
         )}
         <div className="flex gap-2">
