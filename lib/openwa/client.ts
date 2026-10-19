@@ -96,6 +96,14 @@ export function criarClienteOpenwa(baseUrl: string, apiKey: string) {
      * Parar e iniciar gera um código novo em ~8s (medido: hash trocou). É o
      * único caminho que o painel expõe para renovar — não há endpoint de
      * refresh.
+     *
+     * ─── Por que não espera o `start` ──────────────────────────────────────
+     * Medido no painel: `stop` responde em ~1.4s, mas `start` não responde
+     * nem em 30s — estoura o timeout da função e a tela fica sem QR nenhum
+     * (ECONNRESET, confirmado em produção). O `start` é fire-and-forget: o
+     * painel dispara o motor em background e segue sem responder. Então só o
+     * `stop` é aguardado; o `start` é emitido e esquecido, e o `updatedAt`
+     * fresco que ele deixa é o que impede a rota de reiniciar de novo.
      */
     async reiniciarSessao(id: string): Promise<void> {
       await fetch(url(`/api/sessions/${id}/stop`), {
@@ -104,7 +112,7 @@ export function criarClienteOpenwa(baseUrl: string, apiKey: string) {
         body: "{}",
         ...comTempo(),
       }).catch(() => {});
-      await fetch(url(`/api/sessions/${id}/start`), {
+      void fetch(url(`/api/sessions/${id}/start`), {
         method: "POST",
         headers,
         body: "{}",
